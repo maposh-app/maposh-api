@@ -1,6 +1,14 @@
 # NOTE: update this with your service name
 service: maposh-api
 
+package:
+  exclude:
+    - node_modules
+    - tests
+  include:
+    - db/**
+    - features/**
+
 # Use the serverless-webpack plugin to transpile ES6
 plugins:
   - serverless-webpack
