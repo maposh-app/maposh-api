@@ -1,33 +1,32 @@
-const slsw = require("serverless-webpack");
-const nodeExternals = require("webpack-node-externals");
+const path = require('path');
+// eslint-disable-next-line import/no-extraneous-dependencies
+const nodeExternals = require('webpack-node-externals');
+// eslint-disable-next-line import/no-extraneous-dependencies
+const slsw = require('serverless-webpack');
 
 module.exports = {
   entry: slsw.lib.entries,
-  target: "node",
-  // Generate sourcemaps for proper error messages
-  devtool: 'source-map',
-  // Since 'aws-sdk' is not compatible with webpack,
-  // we exclude all node dependencies
+  target: 'node',
   externals: [nodeExternals()],
-  mode: slsw.lib.webpack.isLocal ? "development" : "production",
-  optimization: {
-    // We do not want to minimize our code.
-    minimize: false
-  },
-  performance: {
-    // Turn off size warnings for entry points
-    hints: false
-  },
-  // Run babel on all .js files and skip those in node_modules
   module: {
     rules: [
       {
         test: /\.js$/,
-        loader: "babel-loader",
-        include: __dirname,
-        exclude: /node_modules/
-      }
-    ]
-  }
+        use: [
+          'imports-loader?graphql',
+          {
+            loader: 'babel-loader',
+            options: {
+              presets: [['env', { targets: { node: '8.10' } }]],
+            },
+          },
+        ],
+      },
+    ],
+  },
+  output: {
+    libraryTarget: 'commonjs',
+    path: path.join(__dirname, '.webpack'),
+    filename: '[name].js',
+  },
 };
-

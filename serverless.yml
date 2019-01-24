@@ -1,38 +1,195 @@
-# NOTE: update this with your service name
-service: maposh-api
+service: serverless-graphql-dynamo
 
-# Use the serverless-webpack plugin to transpile ES6
-plugins:
-  - serverless-webpack
-  - serverless-offline
-  - serverless-dotenv-plugin
-
-# serverless-webpack configuration
-# Enable auto-packing of external modules
-custom:
-  webpack:
-    webpackConfig: ./webpack.config.js
-    includeModules: true
+frameworkVersion: ">=1.21.0 <2.0.0"
 
 provider:
   name: aws
   runtime: nodejs8.10
-  stage: prod
+  stage: dev
   region: us-east-1
-  timeout: 150
-  vpc:
-    securityGroupIds:
-      - ${env:SECURITY_GROUP_ID}
-    subnetIds:
-      - ${env:SUBNET1_ID}
-      - ${env:SUBNET2_ID}
-      - ${env:SUBNET3_ID}
-  iamRoleStatements:
-    - Effect: Allow
-      Action:
-        - ec2:CreateNetworkInterface
-        - ec2:DescribeNetworkInterfaces
-        - ec2:DeleteNetworkInterface
-      Resource: "*"
-  environment:
-    NODE_ENV: ${env:NODE_ENV}
+
+plugins:
+  - serverless-webpack
+  - serverless-dynamodb-local
+  - serverless-offline
+
+custom:
+  serverless-offline:
+    port: 4000
+  webpackIncludeModules: true
+  dynamodb:
+    start:
+      port: 8000
+      inMemory: true
+      migrate: true
+      seed: true
+    seed:
+      test:
+        sources:
+          - table: Users
+            sources: [seed-data/Users.json]
+          - table: Reviews
+            sources: [seed-data/Reviews.json]
+
+functions:
+  graphql:
+    handler: handler.graphqlHandler
+    role: ServiceRole
+    events:
+      - http:
+          path: graphql
+          method: post
+          cors: true
+      - http:
+          path: graphql
+          method: get
+
+resources:
+  Resources:
+    UserTable:
+      Type: "AWS::DynamoDB::Table"
+      Properties:
+        KeySchema:
+          - AttributeName: handle
+            KeyType: HASH
+        AttributeDefinitions:
+          - AttributeName: handle
+            AttributeType: S
+        ProvisionedThroughput:
+          ReadCapacityUnits: 10
+          WriteCapacityUnits: 10
+        TableName: "Users"
+
+    PlacesTable:
+      Type: "AWS::DynamoDB::Table"
+      Properties:
+        KeySchema:
+          - AttributeName: place_id
+            KeyType: HASH
+        AttributeDefinitions:
+          - AttributeName: place_id
+            AttributeType: S
+          - AttributeName: name
+            AttributeType: S
+          - AttributeName: address
+            AttributeType: S
+          - AttributeName: city
+            AttributeType: S
+          - AttributeName: state
+            AttributeType: S
+          - AttributeName: rank
+            AttributeType: N
+          - AttributeName: latitude
+            AttributeType: N
+          - AttributeName: longitude
+            AttributeType: N
+          - AttributeName: created_at
+            AttributeType: S
+        ProvisionedThroughput:
+          ReadCapacityUnits: 10
+          WriteCapacityUnits: 10
+        TableName: "Places"
+        GlobalSecondaryIndexes:
+          - IndexName: top-city-places
+            KeySchema:
+              - AttributeName: city
+                KeyType: HASH
+              - AttributeName: rank
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+            ProvisionedThroughput:
+              ReadCapacityUnits: 50
+              WriteCapacityUnits: 50
+
+    ReviewsTable:
+      Type: "AWS::DynamoDB::Table"
+      Properties:
+        KeySchema:
+          - AttributeName: review_id
+            KeyType: HASH
+        AttributeDefinitions:
+          - AttributeName: review_id
+            AttributeType: S
+          - AttributeName: place_id
+            AttributeType: S
+          - AttributeName: upvote_count
+            AttributeType: N
+          - AttributeName: handle
+            AttributeType: S
+          - AttributeName: created_at
+            AttributeType: S
+        ProvisionedThroughput:
+          ReadCapacityUnits: 10
+          WriteCapacityUnits: 10
+        TableName: "Reviews"
+        GlobalSecondaryIndexes:
+          - IndexName: top-user-reviews
+            KeySchema:
+              - AttributeName: handle
+                KeyType: HASH
+              - AttributeName: upvote_count
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+            ProvisionedThroughput:
+              ReadCapacityUnits: 50
+              WriteCapacityUnits: 50
+          - IndexName: place-reviews
+            KeySchema:
+              - AttributeName: place_id
+                KeyType: HASH
+              - AttributeName: upvote_count
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+            ProvisionedThroughput:
+              ReadCapacityUnits: 50
+              WriteCapacityUnits: 50
+    ServiceRole:
+      Type: "AWS::IAM::Role"
+      Properties:
+        RoleName: "DynamoRole"
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: "Allow"
+              Principal:
+                Service:
+                  - "lambda.amazonaws.com"
+              Action:
+                - "sts:AssumeRole"
+        Policies:
+          - PolicyName: "Dynamo-ServiceRole-Policy"
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: "Allow"
+                  Action:
+                    - "dynamodb:Query"
+                    - "dynamodb:BatchWriteItem"
+                    - "dynamodb:GetItem"
+                    - "dynamodb:DeleteItem"
+                    - "dynamodb:PutItem"
+                    - "dynamodb:Scan"
+                    - "dynamodb:UpdateItem"
+                  Resource:
+                    - "arn:aws:dynamodb:us-east-1:*:table/Users"
+                    - "arn:aws:dynamodb:us-east-1:*:table/Users/*"
+                    - "arn:aws:dynamodb:us-east-1:*:table/Reviews"
+                    - "arn:aws:dynamodb:us-east-1:*:table/Reviews/*"
+    XrayLambdaRolePolicy:
+      Type: "AWS::IAM::Policy"
+      Properties:
+        PolicyName: "xray-policy"
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: "Allow"
+              Action:
+                - "xray:PutTraceSegments"
+                - "xray:PutTelemetryRecords"
+              Resource:
+                - "*"
+        Roles:
+          - Ref: ServiceRole
