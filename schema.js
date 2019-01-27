@@ -2,6 +2,7 @@ const schema = `
 type Mutation {
     # Create a user review
     createReview(
+        review_id: String!,
         review: String!,
         consumer_key: String,
         consumer_secret: String,
@@ -26,7 +27,7 @@ type Mutation {
         location: String!,
         description: String!,
         name: String!,
-        following: [String!]!
+        favourites: [String!]!
     ): User!
 }
 
@@ -47,6 +48,7 @@ type Subscription {
 
 type Review {
     review_id: String!
+    place_id: String!
     review: String!
     upvote_count: Int
     created_at: String!
@@ -59,12 +61,14 @@ type ReviewConnection {
 
 input TokenInput {
     review_id : String!
+    place_id : String!
     created_at: String!
     handle: String!
 }
 
 type Token {
     review_id : String!
+    place_id : String!
     created_at: String!
     handle: String!
 }
@@ -75,6 +79,23 @@ type User {
     location: String!
     description: String!
     favourites: [String!]!
+    topReview: Review
+    reviews(limit: Int, nextToken: TokenInput): ReviewConnection
+
+    searchReviewsByKeyword(keyword: String!): ReviewConnection
+}
+
+type Place {
+    name: String!
+    place_id: String!
+    address: String!
+    description: String!
+    followers: [String!]!
+    city: String!
+    state: String!
+    rank: Int!
+    latitude: Int!
+    longitude: Int!
     topReview: Review
     reviews(limit: Int, nextToken: TokenInput): ReviewConnection
 

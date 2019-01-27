@@ -1,0 +1,35 @@
+Resources:
+  ServiceRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      RoleName: "DynamoRole"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - "lambda.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Policies:
+        - PolicyName: "Dynamo-ServiceRole-Policy"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "dynamodb:Query"
+                  - "dynamodb:BatchWriteItem"
+                  - "dynamodb:GetItem"
+                  - "dynamodb:DeleteItem"
+                  - "dynamodb:PutItem"
+                  - "dynamodb:Scan"
+                  - "dynamodb:UpdateItem"
+                Resource:
+                  - "arn:aws:dynamodb:us-east-1:*:table/Users"
+                  - "arn:aws:dynamodb:us-east-1:*:table/Users/*"
+                  - "arn:aws:dynamodb:us-east-1:*:table/Reviews"
+                  - "arn:aws:dynamodb:us-east-1:*:table/Reviews/*"
+                  - "arn:aws:dynamodb:us-east-1:*:table/Places"
+                  - "arn:aws:dynamodb:us-east-1:*:table/Places/*"
