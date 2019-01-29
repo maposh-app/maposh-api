@@ -185,6 +185,6 @@ export const resolvers = {
     reviews: (obj, args) => data.getPaginatedUserReviews(obj.handle, args)
   },
   Place: {
-    reviews: (obj, args) => data.getPaginatedPlaceReviews(obj.handle, args)
+    reviews: (obj, args) => data.getPaginatedPlaceReviews(obj.place_id, args)
   }
 };

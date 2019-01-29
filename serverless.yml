@@ -14,9 +14,12 @@ plugins:
   - serverless-offline
 
 custom:
+  stage: ${opt:stage, self:provider.stage}
+
   serverless-offline:
     port: 4000
   webpackIncludeModules: true
+
   dynamodb:
     start:
       port: 8000
@@ -47,6 +50,9 @@ functions:
           method: get
 
 resources:
-  - ${file(resources/dynamo-db.yml)}
   - ${file(resources/iam-dynamo.yml)}
   - ${file(resources/iam-x-ray.yml)}
+  - ${file(resources/dynamo-db.yml)}
+  - ${file(resources/s3-bucket.yml)}
+  - ${file(resources/cognito-user-pool.yml)}
+  - ${file(resources/cognito-identity-pool.yml)}
