@@ -38,7 +38,7 @@ custom:
 
 functions:
   graphql:
-    handler: handler.graphqlHandler
+    handler: lib/handler.graphqlHandler
     role: ServiceRole
     events:
       - http:
@@ -50,9 +50,9 @@ functions:
           method: get
 
 resources:
-  - ${file(resources/iam-dynamo.yml)}
-  - ${file(resources/iam-x-ray.yml)}
-  - ${file(resources/dynamo-db.yml)}
-  - ${file(resources/s3-bucket.yml)}
-  - ${file(resources/cognito-user-pool.yml)}
-  - ${file(resources/cognito-identity-pool.yml)}
+  - ${file(lib/resources/iam-dynamo.yml)}
+  - ${file(lib/resources/iam-x-ray.yml)}
+  - ${file(lib/resources/dynamo-db.yml)}
+  - ${file(lib/resources/s3-bucket.yml)}
+  - ${file(lib/resources/cognito-user-pool.yml)}
+  - ${file(lib/resources/cognito-identity-pool.yml)}
