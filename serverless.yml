@@ -9,6 +9,7 @@ provider:
   region: us-east-1
 
 plugins:
+  - serverless-plugin-typescript
   - serverless-webpack
   - serverless-dynamodb-local
   - serverless-offline
@@ -18,7 +19,11 @@ custom:
 
   serverless-offline:
     port: 4000
+
   webpackIncludeModules: true
+  webpack:
+    webpackConfig: ./webpack.config.js
+    packager: "yarn" # Packager that will be used to package your external modules
 
   dynamodb:
     start:
@@ -53,6 +58,5 @@ resources:
   - ${file(lib/resources/iam-dynamo.yml)}
   - ${file(lib/resources/iam-x-ray.yml)}
   - ${file(lib/resources/dynamo-db.yml)}
-  - ${file(lib/resources/s3-bucket.yml)}
   - ${file(lib/resources/cognito-user-pool.yml)}
   - ${file(lib/resources/cognito-identity-pool.yml)}

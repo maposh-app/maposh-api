@@ -1,4 +1,3 @@
-// add to handler.js
 import dynamodb from "serverless-dynamodb-client";
 
 let docClient;
@@ -48,7 +47,7 @@ const data = {
 
       docClient.query(params, callback);
     }).then(result => {
-      const reviews= [];
+      const reviews = [];
       let listOfReviews;
 
       console.log(result);
@@ -66,7 +65,7 @@ const data = {
           created_at: result.Items[i].created_at,
           handle: result.Items[i].handle,
           review: result.Items[i].review,
-          upvote_count: result.Items[i].upvote_count,
+          upvote_count: result.Items[i].upvote_count
         });
       }
 
@@ -127,7 +126,7 @@ const data = {
           created_at: result.Items[i].created_at,
           handle: result.Items[i].handle,
           review: result.Items[i].review,
-          upvote_count: result.Items[i].upvote_count,
+          upvote_count: result.Items[i].upvote_count
         });
       }
 

@@ -1,5 +1,5 @@
 // add to handler.js
-import dynamodb from "serverless-dynamodb-client";
+const dynamodb = require("serverless-dynamodb-client");
 
 let docClient;
 
