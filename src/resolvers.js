@@ -23,18 +23,21 @@ const promisify = foo =>
   });
 
 const data = {
-  getPaginatedUserReviews(handle, args) {
+  getPaginatedUserReviews(args) {
     return promisify(callback => {
       const params = {
         TableName: "Reviews",
         KeyConditionExpression: "handle = :v1",
         ExpressionAttributeValues: {
-          ":v1": handle
+          ":v1": args.handle
         },
         IndexName: "top-user-reviews",
-        Limit: args.limit,
         ScanIndexForward: false
       };
+
+      if (args.limit) {
+        params.Limit = args.limit;
+      }
 
       if (args.nextToken) {
         params.ExclusiveStartKey = {
@@ -74,7 +77,7 @@ const data = {
       if (result.LastEvaluatedKey) {
         listOfReviews.nextToken = {
           review_id: result.LastEvaluatedKey.review_id,
-          place_id: result.Items[i].place_id,
+          place_id: result.LastEvaluatedKey.place_id,
           created_at: result.LastEvaluatedKey.created_at,
           handle: result.LastEvaluatedKey.handle
         };
@@ -84,18 +87,21 @@ const data = {
     });
   },
 
-  getPaginatedPlaceReviews(place_id, args) {
+  getPaginatedPlaceReviews(args) {
     return promisify(callback => {
       const params = {
         TableName: "Reviews",
         KeyConditionExpression: "place_id = :v1",
         ExpressionAttributeValues: {
-          ":v1": place_id
+          ":v1": args.place_id
         },
         IndexName: "place-reviews",
-        Limit: args.limit,
         ScanIndexForward: false
       };
+
+      if (args.limit) {
+        params.Limit = args.limit;
+      }
 
       if (args.nextToken) {
         params.ExclusiveStartKey = {
@@ -135,7 +141,7 @@ const data = {
       if (result.LastEvaluatedKey) {
         listOfReviews.nextToken = {
           review_id: result.LastEvaluatedKey.review_id,
-          place_id: result.Items[i].place_id,
+          place_id: result.LastEvaluatedKey.place_id,
           created_at: result.LastEvaluatedKey.created_at,
           handle: result.LastEvaluatedKey.handle
         };
@@ -177,15 +183,10 @@ const data = {
 // eslint-disable-next-line import/prefer-default-export
 export const resolvers = {
   Query: {
-    getUserInfo: (root, args) => data.getUserInfo(args)
+    getUserInfo: (root, args) => data.getUserInfo(args),
+    getPaginatedUserReviews: (root, args) => data.getPaginatedUserReviews(args)
   },
   Mutation: {
     createReview: (root, args) => data.createReview(args)
-  },
-  User: {
-    reviews: (obj, args) => data.getPaginatedUserReviews(obj.handle, args)
-  },
-  Place: {
-    reviews: (obj, args) => data.getPaginatedPlaceReviews(obj.place_id, args)
   }
 };

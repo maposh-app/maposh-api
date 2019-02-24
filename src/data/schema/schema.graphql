@@ -38,6 +38,8 @@ type Query {
     consumer_secret: String
   ): User!
 
+  getPaginatedUserReviews(handle: String!, limit: Int): ReviewConnection!
+
   searchAllReviewsByKeyword(keyword: String!): ReviewConnection
 }
 
