@@ -6,7 +6,6 @@
     "quotemark": [true, "single", "jsx-double"],
     "jsx-no-multiline-js": false,
     "jsx-no-lambda": false,
-    "ordered-imports": true,
     "no-console": {
       "severity": "warning"
     },

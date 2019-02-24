@@ -1,55 +1,32 @@
 import dynamodb from "serverless-dynamodb-client";
-
-let docClient;
-
-if (process.env.NODE_ENV === "production") {
-  const AWSXRay = require("aws-xray-sdk"); // eslint-disable-line global-require
-  const AWS = AWSXRay.captureAWS(require("aws-sdk")); // eslint-disable-line global-require
-  docClient = new AWS.DynamoDB.DocumentClient();
-} else {
-  docClient = dynamodb.doc;
-}
-
-// add to handler.js
-const promisify = foo =>
-  new Promise((resolve, reject) => {
-    foo((error, result) => {
-      if (error) {
-        reject(error);
-      } else {
-        resolve(result);
-      }
-    });
-  });
+import { promisify } from "../utils/helpers";
+import { query } from "./db/dynamo";
 
 const data = {
   getPaginatedUserReviews(args) {
-    return promisify(callback => {
-      const params = {
-        TableName: "Reviews",
-        KeyConditionExpression: "handle = :v1",
-        ExpressionAttributeValues: {
-          ":v1": args.handle
-        },
-        IndexName: "top-user-reviews",
-        ScanIndexForward: false
+    const params = {
+      TableName: "Reviews",
+      KeyConditionExpression: "handle = :v1",
+      ExpressionAttributeValues: {
+        ":v1": args.handle
+      },
+      IndexName: "top-user-reviews",
+      ScanIndexForward: false
+    };
+
+    if (args.limit) {
+      params.Limit = args.limit;
+    }
+
+    if (args.nextToken) {
+      params.ExclusiveStartKey = {
+        review_id: args.nextToken.review_id,
+        place_id: args.nextToken.place_id,
+        created_at: args.nextToken.created_at,
+        handle: handle
       };
-
-      if (args.limit) {
-        params.Limit = args.limit;
-      }
-
-      if (args.nextToken) {
-        params.ExclusiveStartKey = {
-          review_id: args.nextToken.review_id,
-          place_id: args.nextToken.place_id,
-          created_at: args.nextToken.created_at,
-          handle: handle
-        };
-      }
-
-      docClient.query(params, callback);
-    }).then(result => {
+    }
+    return query(params).then(result => {
       const reviews = [];
       let listOfReviews;
 
@@ -88,32 +65,29 @@ const data = {
   },
 
   getPaginatedPlaceReviews(args) {
-    return promisify(callback => {
-      const params = {
-        TableName: "Reviews",
-        KeyConditionExpression: "place_id = :v1",
-        ExpressionAttributeValues: {
-          ":v1": args.place_id
-        },
-        IndexName: "place-reviews",
-        ScanIndexForward: false
+    const params = {
+      TableName: "Reviews",
+      KeyConditionExpression: "place_id = :v1",
+      ExpressionAttributeValues: {
+        ":v1": args.place_id
+      },
+      IndexName: "place-reviews",
+      ScanIndexForward: false
+    };
+
+    if (args.limit) {
+      params.Limit = args.limit;
+    }
+
+    if (args.nextToken) {
+      params.ExclusiveStartKey = {
+        review_id: args.nextToken.review_id,
+        place_id: args.nextToken.place_id,
+        created_at: args.nextToken.created_at,
+        place_id: place_id
       };
-
-      if (args.limit) {
-        params.Limit = args.limit;
-      }
-
-      if (args.nextToken) {
-        params.ExclusiveStartKey = {
-          review_id: args.nextToken.review_id,
-          place_id: args.nextToken.place_id,
-          created_at: args.nextToken.created_at,
-          place_id: place_id
-        };
-      }
-
-      docClient.query(params, callback);
-    }).then(result => {
+    }
+    return query(params).then(result => {
       const reviews = [];
       let listOfReviews;
 
@@ -152,18 +126,13 @@ const data = {
   },
 
   getUserInfo(args) {
-    return promisify(callback =>
-      docClient.query(
-        {
-          TableName: "Users",
-          KeyConditionExpression: "handle = :v1",
-          ExpressionAttributeValues: {
-            ":v1": args.handle
-          }
-        },
-        callback
-      )
-    ).then(result => {
+    query({
+      TableName: "Users",
+      KeyConditionExpression: "handle = :v1",
+      ExpressionAttributeValues: {
+        ":v1": args.handle
+      }
+    }).then(result => {
       let listOfReviews;
 
       if (result.Items.length >= 1) {
