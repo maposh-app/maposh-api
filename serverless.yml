@@ -8,22 +8,16 @@ provider:
   stage: dev
   region: us-east-1
 
-plugins:
-  - serverless-plugin-typescript
-  - serverless-webpack
-  - serverless-dynamodb-local
-  - serverless-offline
-
 custom:
   stage: ${opt:stage, self:provider.stage}
 
+  webpack:
+    webpackConfig: webpack.config.js
+    packager: "yarn"
+    includeModules: true
+
   serverless-offline:
     port: 4000
-
-  webpackIncludeModules: true
-  webpack:
-    webpackConfig: ./webpack.config.js
-    packager: "yarn" # Packager that will be used to package your external modules
 
   dynamodb:
     start:
@@ -35,15 +29,15 @@ custom:
       test:
         sources:
           - table: Users
-            sources: [seed-data/Users.json]
+            sources: [utils/seed-data/Users.json]
           - table: Reviews
-            sources: [seed-data/Reviews.json]
+            sources: [utils/seed-data/Reviews.json]
           - table: Places
-            sources: [seed-data/Places.json]
+            sources: [utils/seed-data/Places.json]
 
 functions:
   graphql:
-    handler: lib/handler.graphqlHandler
+    handler: ./src/handler.graphqlHandler
     role: ServiceRole
     events:
       - http:
@@ -55,8 +49,13 @@ functions:
           method: get
 
 resources:
-  - ${file(lib/resources/iam-dynamo.yml)}
-  - ${file(lib/resources/iam-x-ray.yml)}
-  - ${file(lib/resources/dynamo-db.yml)}
-  - ${file(lib/resources/cognito-user-pool.yml)}
-  - ${file(lib/resources/cognito-identity-pool.yml)}
+  - ${file(src/resources/iam-dynamo.yml)}
+  - ${file(src/resources/iam-x-ray.yml)}
+  - ${file(src/resources/dynamo-db.yml)}
+  - ${file(src/resources/cognito-user-pool.yml)}
+  - ${file(src/resources/cognito-identity-pool.yml)}
+
+plugins:
+  - serverless-webpack
+  - serverless-dynamodb-local
+  - serverless-offline

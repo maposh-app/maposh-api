@@ -9,10 +9,10 @@
   "scripts": {
     "pretest": "./scripts/pre.sh",
     "test": "jest",
-    "dynamodb-generate-seed-data": "cd lib/seed-data && node create_seed_data.js",
+    "dynamodb-generate-seed-data": "cd utils/seed-data && node create_seed_data.js",
     "dynamodb-insert-seed-data-prod": "cd lib/seed-data && node insert_seed_data_prod.js",
     "prestart": "./scripts/pre.sh",
-    "start": "yarn dynamodb-generate-seed-data && serverless dynamodb install && env-cmd .env.local serverless offline start",
+    "start": "yarn dynamodb-generate-seed-data && serverless dynamodb install --localPath ./bin && env-cmd .env.local serverless offline start",
     "deploy-prod": "yarn dynamodb-generate-seed-data && env-cmd .env.prod serverless --stage=production deploy && yarn dynamodb-insert-seed-data-prod"
   },
   "dependencies": {
@@ -24,6 +24,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.0.0",
+    "@babel/plugin-proposal-class-properties": "^7.3.3",
     "@babel/preset-env": "^7.0.0",
     "@babel/preset-typescript": "^7.3.3",
     "@types/aws-lambda": "^8.10.19",
@@ -32,10 +33,11 @@
     "@types/jest": "^24.0.6",
     "@types/node": "^11.9.5",
     "aws-sdk": "^2.409.0",
-    "babel-core": "^7.0.0-bridge.0",
+    "babel-core": "^6.26.3",
     "babel-jest": "^24.1.0",
     "babel-loader": "^8.0.5",
     "babel-plugin-import-graphql": "^2.6.2",
+    "babel-preset-env": "^1.7.0",
     "body-parser": "^1.15.2",
     "cors": "2.8.5",
     "env-cmd": "^8.0.2",
@@ -50,7 +52,8 @@
     "serverless-plugin-typescript": "^1.1.5",
     "serverless-webpack": "^5.2.0",
     "ts-jest": "^24.0.0",
-    "tslint": "^5.12.1",
+    "ts-loader": "^5.3.3",
+    "tslint": "^5.13.0",
     "tslint-config-prettier": "^1.18.0",
     "typescript": "^3.3.3333",
     "webpack": "^4.29.5",

@@ -7,6 +7,7 @@ const slsw = require("serverless-webpack");
 module.exports = {
   entry: slsw.lib.entries,
   target: "node",
+  mode: "none",
   externals: [nodeExternals()],
   module: {
     rules: [
@@ -17,7 +18,7 @@ module.exports = {
           {
             loader: "babel-loader",
             options: {
-              presets: [["env", { targets: { node: "8.10" } }]]
+              presets: [["@babel/preset-env", { targets: { node: "8.10" } }]]
             }
           }
         ]
@@ -39,7 +40,7 @@ module.exports = {
   },
   output: {
     libraryTarget: "commonjs",
-    path: path.join(__dirname, ".webpack"),
+    path: path.join(__dirname, ".build"),
     filename: "[name].js"
   }
 };
