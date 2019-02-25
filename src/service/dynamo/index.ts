@@ -12,7 +12,7 @@ import {
   UpdateItemInput,
   UpdateItemOutput
 } from "aws-sdk/clients/dynamodb";
-import { promisify } from "../../utils/helpers";
+import { promisify } from "../../../utils/helpers";
 
 let docClient = require("serverless-dynamodb-client").doc;
 

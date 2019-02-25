@@ -1,11 +1,23 @@
-import { ApolloServer } from "apollo-server-lambda";
-import { resolvers } from "../resolvers";
-import * as colors from "../config/console_colors";
-import config from "../config";
-import schema from "../data/schema/schema.graphql";
+import { ApolloServer, gql } from "apollo-server-lambda";
+import { mergeTypes } from "merge-graphql-schemas";
+import { resolvers } from "../../resolvers";
+import * as colors from "../../config/console_colors";
+import config from "../../config";
+
+import placeType from "../../model/types/place.graphql";
+import reviewType from "../../model/types/review.graphql";
+import userType from "../../model/types/user.graphql";
 
 const playgroundConfig = (() => {
-  const defaultQuery = "query{ hello }";
+  const defaultQuery = `
+  {
+    getPaginatedUserReviews(handle: "Murl_Wehner", limit: 3) {
+      items {
+        review
+      }
+    }
+  }
+  `;
 
   return {
     playground: {
@@ -34,9 +46,11 @@ const loggingConfig = (() => {
   };
 })();
 
+const typeDefs = mergeTypes([userType, placeType, reviewType]);
+
 const server = new ApolloServer({
   resolvers,
-  typeDefs: schema,
+  typeDefs: gql(typeDefs),
   ...loggingConfig,
   ...playgroundConfig
 });

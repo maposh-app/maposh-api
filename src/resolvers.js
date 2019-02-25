@@ -1,6 +1,5 @@
-import dynamodb from "serverless-dynamodb-client";
 import { promisify } from "../utils/helpers";
-import { query } from "./db/dynamo";
+import { query } from "./service/dynamo";
 
 const data = {
   getPaginatedUserReviews(args) {
