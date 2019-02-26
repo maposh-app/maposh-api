@@ -18,6 +18,7 @@ type Query {
   ): User!
   getPaginatedUserReviews(handle: String!, limit: Int): ReviewConnection!
 }
+
 type User {
   name: String!
   handle: String!

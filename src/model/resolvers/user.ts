@@ -1,7 +1,7 @@
-import { QueryInput, QueryOutput } from "aws-sdk/clients/dynamodb";
-
-import * as db from "../../service/dynamo";
+import { IResolvers } from "graphql-tools";
 import { IToken, IReviewsList } from "../../../types/resolvers";
+import { QueryInput, QueryOutput } from "aws-sdk/clients/dynamodb";
+import * as db from "../../service/dynamo";
 
 function getPaginatedUserReviews(args) {
   const params: QueryInput = {
@@ -90,8 +90,8 @@ function getUserInfo(args) {
 
 export default {
   Query: {
-    getUserInfo: (root, args) => data.getUserInfo(args),
-    getPaginatedUserReviews: (root, args) => data.getPaginatedUserReviews(args)
+    getUserInfo: (root, args) => getUserInfo(args),
+    getPaginatedUserReviews: (root, args) => getPaginatedUserReviews(args)
   },
   Mutation: {}
 };

@@ -3,6 +3,7 @@ import { mergeTypes } from "merge-graphql-schemas";
 import { resolvers } from "../../resolvers";
 import * as colors from "../../config/console_colors";
 import config from "../../config";
+import "reflect-metadata";
 
 import placeType from "../../model/types/place.graphql";
 import reviewType from "../../model/types/review.graphql";
