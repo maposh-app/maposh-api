@@ -1,6 +1,6 @@
 import { Key, AttributeValue } from "aws-sdk/clients/dynamodb";
 import uuid from "uuid/v1";
-import * as db from "./dynamo";
+import * as db from "../../service/dynamo";
 
 const TableName = "Reviews";
 const datetime = new Date();
@@ -90,3 +90,9 @@ export function deleteReview(review_id: Key) {
 
   return db.deleteItem(params);
 }
+export default {
+  Query: {},
+  Mutation: {
+    createReview: (root, args) => data.createReview(args)
+  },
+};

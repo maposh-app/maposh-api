@@ -37,7 +37,7 @@ custom:
 
 functions:
   graphql:
-    handler: ./src/handler.graphqlHandler
+    handler: ./src/handler.graphql
     role: ServiceRole
     events:
       - http:
