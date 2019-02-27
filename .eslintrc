@@ -16,7 +16,20 @@
   "settings": {
     "plugins": ["import"],
     "rules": {
-      "import/no-unresolved": "error"
+      "import/no-unresolved": "error",
+      "import/order": [
+        "error",
+        {
+          "groups": [
+            "index",
+            "sibling",
+            "parent",
+            "internal",
+            "external",
+            "builtin"
+          ]
+        }
+      ]
     },
     "import/resolver": {
       "typescript": {}

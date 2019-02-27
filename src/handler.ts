@@ -1,8 +1,8 @@
 import {
-  Context,
   APIGatewayProxyEvent,
+  APIGatewayProxyResult,
   Callback,
-  APIGatewayProxyResult
+  Context
 } from "aws-lambda";
 import bootstrap from "./service/apollo";
 

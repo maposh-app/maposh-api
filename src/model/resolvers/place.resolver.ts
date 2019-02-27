@@ -1,4 +1,4 @@
-import { Key, AttributeValue } from "aws-sdk/clients/dynamodb";
+import { AttributeValue, Key } from "aws-sdk/clients/dynamodb";
 
 import uuid from "uuid/v1";
 import * as db from "../../service/dynamo";

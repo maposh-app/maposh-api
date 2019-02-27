@@ -14,7 +14,6 @@ module.exports = {
       {
         test: /\.jsx?$/,
         use: [
-          // "imports-loader?graphql",
           {
             loader: "babel-loader",
             options: {
@@ -27,12 +26,7 @@ module.exports = {
         test: /\.tsx?$/,
         use: "ts-loader",
         exclude: /node_modules/
-      },
-      // {
-      //   test: /\.(graphql|gql)$/,
-      //   exclude: /node_modules/,
-      //   loader: "graphql-tag/loader"
-      // }
+      }
     ]
   },
   resolve: {

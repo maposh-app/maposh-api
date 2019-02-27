@@ -1,4 +1,4 @@
-import { Key, AttributeValue } from "aws-sdk/clients/dynamodb";
+import { AttributeValue, Key } from "aws-sdk/clients/dynamodb";
 import uuid from "uuid/v1";
 import * as db from "../../service/dynamo";
 
@@ -19,35 +19,6 @@ export function getReviews() {
 
   return db.scan(params);
 }
-
-export async function getReviewsByAuthor(handle: Key) {
-  const params = {
-    TableName,
-    IndexName: "top-user-reviews",
-    KeyConditionExpression: "handle = :handle",
-    ExpressionAttributeValues: {
-      ":handle": handle
-    }
-  };
-
-  return db.query(params);
-}
-
-export function getReviewAttributes(
-  review_id: Key,
-  ...attributes: AttributeValue[]
-) {
-  const params = {
-    TableName,
-    Key: {
-      review_id
-    },
-    ProjectionExpression: attributes.join()
-  };
-
-  return db.get(params);
-}
-
 export function addReview(args: { [property: string]: AttributeValue }) {
   const params = {
     TableName,

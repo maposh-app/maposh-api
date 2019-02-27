@@ -1,15 +1,16 @@
-import "reflect-metadata";
-import {
-  Context,
-  APIGatewayProxyEvent,
-  Callback,
-  APIGatewayProxyResult
-} from "aws-lambda";
 import { ApolloServer } from "apollo-server-lambda";
+import {
+  APIGatewayProxyEvent,
+  APIGatewayProxyResult,
+  Callback,
+  Context
+} from "aws-lambda";
+import "reflect-metadata";
 import { buildSchema } from "type-graphql";
-import { UserResolver } from "../../model/resolvers/user.resolver";
-import * as colors from "../../config/console_colors";
 import config from "../../config";
+import * as colors from "../../config/console_colors";
+import { UserResolver } from "../../model/resolvers/user.resolver";
+
 const playgroundConfig = (() => {
   const defaultQuery = `
   {
@@ -38,11 +39,15 @@ const playgroundConfig = (() => {
 const loggingConfig = (() => {
   return {
     formatError: (error: any) => {
-      !config.isProd && console.log(colors.error(error));
+      if (!config.isProd) {
+        console.log(colors.error(error));
+      }
       return error;
     },
     formatResponse: (response: any) => {
-      !config.isProd && console.log(colors.info(response));
+      if (!config.isProd) {
+        console.log(colors.info(response));
+      }
       return response;
     }
   };
