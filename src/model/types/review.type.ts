@@ -22,7 +22,7 @@ export class Review {
 }
 
 @ObjectType()
-export class ReviewToken {
+export class TopUserReviewToken {
   @Field(type => ID)
   review_id: string;
 
@@ -34,10 +34,31 @@ export class ReviewToken {
 }
 
 @ObjectType()
-export class ReviewConnection {
+export class TopUserReviewsConnection {
   @Field(type => [Review])
   items: [Review?];
 
-  @Field(type => ReviewToken)
-  nextToken?: ReviewToken;
+  @Field(type => TopUserReviewToken)
+  nextToken?: TopUserReviewToken;
+}
+
+@ObjectType()
+export class TopPlaceReviewToken {
+  @Field(type => ID)
+  review_id: string;
+
+  @Field(type => Int)
+  upvote_count: number;
+
+  @Field()
+  place_id: string;
+}
+
+@ObjectType()
+export class TopPlaceReviewsConnection {
+  @Field(type => [Review])
+  items: [Review?];
+
+  @Field(type => TopPlaceReviewToken)
+  nextToken?: TopPlaceReviewToken;
 }

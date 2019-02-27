@@ -1,5 +1,5 @@
-import { graphqlHandler } from "./handler";
+import { graphql } from "./handler";
 
-it("graphqlHandler should be a function", () => {
-  expect(typeof graphqlHandler).toBe("function");
+it("graphql should be a function", () => {
+  expect(typeof graphql).toBe("function");
 });

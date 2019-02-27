@@ -76,7 +76,7 @@ Resources:
           ProvisionedThroughput:
             ReadCapacityUnits: 50
             WriteCapacityUnits: 50
-        - IndexName: place-reviews
+        - IndexName: chronological-place-reviews
           KeySchema:
             - AttributeName: place_id
               KeyType: HASH

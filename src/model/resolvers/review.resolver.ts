@@ -20,7 +20,7 @@ export function getReviews() {
   return db.scan(params);
 }
 
-export function getReviewsByAuthor(handle: Key) {
+export async function getReviewsByAuthor(handle: Key) {
   const params = {
     TableName,
     IndexName: "top-user-reviews",

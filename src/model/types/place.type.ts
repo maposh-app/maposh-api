@@ -1,5 +1,5 @@
 import { Field, ID, ObjectType, Int, Float } from "type-graphql";
-import { ReviewConnection } from "./review.type";
+import { TopPlaceReviewsConnection } from "./review.type";
 import { User } from "./user.type";
 
 @ObjectType()
@@ -35,5 +35,26 @@ export class Place {
   followers?: [User];
 
   @Field({ nullable: true })
-  reviews?: ReviewConnection;
+  reviews?: TopPlaceReviewsConnection;
+}
+
+@ObjectType()
+export class RankedPlaceToken {
+  @Field(type => ID)
+  place_id: string;
+
+  @Field(type => Int)
+  rank: number;
+
+  @Field()
+  city: string;
+}
+
+@ObjectType()
+export class TopCityPlacesConnection {
+  @Field(type => [Place])
+  items: [Place?];
+
+  @Field(type => RankedPlaceToken)
+  nextToken?: RankedPlaceToken;
 }

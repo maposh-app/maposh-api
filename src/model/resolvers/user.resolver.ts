@@ -3,19 +3,25 @@ import {
   QueryOutput,
   AttributeValue
 } from "aws-sdk/clients/dynamodb";
-import { Resolver, Query, Arg } from "type-graphql";
-import { Review, ReviewToken, ReviewConnection } from "../types/review.type";
+import { FieldResolver, Resolver, Root, Query, Arg } from "type-graphql";
+import {
+  Review,
+  TopUserReviewToken,
+  TopUserReviewsConnection
+} from "../types/review.type";
+import { Place } from "../types/place.type";
 import { User } from "../types/user.type";
+// import { Place } from "../types/place.type";
 import * as db from "../../service/dynamo";
-import { ReviewTokenInput } from "../types/review.input";
+import { TopUserReviewTokenInput } from "../types/review.input";
 
 @Resolver(of => User)
 export class UserResolver {
-  @Query(returns => ReviewConnection, { nullable: true })
+  @Query(returns => TopUserReviewsConnection, { nullable: true })
   async getPaginatedUserReviews(
     @Arg("handle") handle: string,
     @Arg("limit") limit?: number,
-    @Arg("nextToken", { nullable: true }) nextToken?: ReviewTokenInput
+    @Arg("nextToken", { nullable: true }) nextToken?: TopUserReviewTokenInput
   ) {
     const params: QueryInput = {
       TableName: "Reviews",
@@ -39,7 +45,9 @@ export class UserResolver {
       };
     }
     return db.query(params).then((result: QueryOutput) => {
-      const listOfReviews: ReviewConnection = { items: [] as [Review?] };
+      const listOfReviews: TopUserReviewsConnection = {
+        items: [] as [Review?]
+      };
 
       console.log(result);
 
@@ -60,7 +68,7 @@ export class UserResolver {
             review_id: result.LastEvaluatedKey.review_id,
             handle: result.LastEvaluatedKey.handle,
             upvote_count: result.LastEvaluatedKey.upvote_count
-          } as ReviewToken;
+          } as TopUserReviewToken;
         }
       }
 
@@ -68,16 +76,32 @@ export class UserResolver {
     });
   }
 
-  @Query(returns => [User], { nullable: true })
+  @Query(returns => User)
   async getUserInfo(@Arg("handle") handle: string) {
-    db.query({
-      TableName: "Users",
-      KeyConditionExpression: "handle = :v1",
-      ExpressionAttributeValues: {
-        ":v1": handle as AttributeValue
-      }
-    }).then(result => {
-      return result.Items ? result.Items[0] : null;
+    return db.getByKey("Users", { handle }).then(result => {
+      return result.Item;
     });
+  }
+
+  @Query(returns => [Place], { nullable: true })
+  async getUserFavourites(@Arg("handle") handle: string) {
+    return db.getByKey("Users", { handle }, "favourites").then(result => {
+      return result.Item
+        ? (result.Item.favourites as [string]).map(async (place_id: string) => {
+            const placeContainer = await db.getByKey("Places", { place_id });
+            return placeContainer.Item;
+          })
+        : [];
+    });
+  }
+
+  @FieldResolver(type => [Place], { nullable: true })
+  async favourites(@Root() user: User) {
+    return await this.getUserFavourites(user.handle);
+  }
+
+  @FieldResolver(type => TopUserReviewsConnection, { nullable: true })
+  async reviews(@Root() user: User) {
+    return await this.getPaginatedUserReviews(user.handle);
   }
 }

@@ -10,7 +10,8 @@ import {
   ScanInput,
   ScanOutput,
   UpdateItemInput,
-  UpdateItemOutput
+  UpdateItemOutput,
+  AttributeValue
 } from "aws-sdk/clients/dynamodb";
 import { promisify } from "../../../utils/helpers";
 
@@ -39,6 +40,23 @@ export const get = (params: GetItemInput) => {
     docClient.get(params, callback)
   );
 };
+
+export function getByKey(
+  tableName: string,
+  key: { [prop: string]: string },
+  ...attributes: string[]
+) {
+  const params: GetItemInput = {
+    TableName: tableName,
+    Key: key as { [prop: string]: AttributeValue }
+  };
+
+  if (attributes.length >= 1) {
+    params.ProjectionExpression = attributes.join();
+  }
+
+  return get(params);
+}
 
 export const createItem = (params: PutItemInput) => {
   return promisify<PutItemOutput>((callback: Function) =>
