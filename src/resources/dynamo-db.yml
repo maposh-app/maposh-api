@@ -3,10 +3,10 @@ Resources:
     Type: "AWS::DynamoDB::Table"
     Properties:
       KeySchema:
-        - AttributeName: handle
+        - AttributeName: user_id
           KeyType: HASH
       AttributeDefinitions:
-        - AttributeName: handle
+        - AttributeName: user_id
           AttributeType: S
       ProvisionedThroughput:
         ReadCapacityUnits: 10
@@ -54,7 +54,7 @@ Resources:
           AttributeType: S
         - AttributeName: upvote_count
           AttributeType: N
-        - AttributeName: handle
+        - AttributeName: user_id
           AttributeType: S
         - AttributeName: place_id
           AttributeType: S
@@ -67,7 +67,7 @@ Resources:
       GlobalSecondaryIndexes:
         - IndexName: top-user-reviews
           KeySchema:
-            - AttributeName: handle
+            - AttributeName: user_id
               KeyType: HASH
             - AttributeName: upvote_count
               KeyType: RANGE

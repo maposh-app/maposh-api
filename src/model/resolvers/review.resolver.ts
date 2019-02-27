@@ -1,37 +1,39 @@
-import { AttributeValue, Key } from "aws-sdk/clients/dynamodb";
+import { Key, PutItemInput, PutItemOutput } from "aws-sdk/clients/dynamodb";
+import { Arg, Ctx, Mutation, Resolver } from "type-graphql";
 import uuid from "uuid/v1";
 import * as db from "../../service/dynamo";
+import { Context } from "../context";
+import { Review } from "../types/review.type";
 
-const TableName = "Reviews";
-const datetime = new Date();
+@Resolver(of => Review)
+export class ReviewResolver {
+  @Mutation(() => Review)
+  public addReview(
+    @Ctx() ctx: Context,
+    @Arg("review_title") review_title: string,
+    @Arg("place_id") place_id: string,
+    @Arg("review", { nullable: true }) review?: string
+  ): Review {
+    const datetime = new Date();
 
-export function getReviews() {
-  const params = {
-    TableName,
-    AttributesToGet: [
-      "handle",
-      "review_id",
-      "place_id",
-      "upvote_count",
-      "created_at"
-    ]
-  };
+    const newReview: Review = {
+      created_at: datetime.toISOString(),
+      place_id,
+      review_id: uuid(),
+      review_title,
+      review: review || "",
+      upvote_count: 0,
+      user_id: ctx.user_id
+    };
 
-  return db.scan(params);
-}
-export function addReview(args: { [property: string]: AttributeValue }) {
-  const params = {
-    TableName,
-    Item: {
-      review_id: uuid() as AttributeValue,
-      place_id: args.place_id,
-      handle: args.handle,
-      review: args.review,
-      created_at: datetime.getTime() as AttributeValue
-    }
-  };
+    const params = {
+      TableName: "Reviews",
+      Item: newReview
+    } as unknown;
 
-  return db.createItem(params);
+    db.createItem(params as PutItemInput).catch(err => console.log(err));
+    return newReview;
+  }
 }
 
 // export function downvoteReview(review_id: Key) {
@@ -53,7 +55,7 @@ export function addReview(args: { [property: string]: AttributeValue }) {
 
 export function deleteReview(review_id: Key) {
   const params = {
-    TableName,
+    TableName: "Reviews",
     Key: {
       id: review_id
     }
@@ -61,9 +63,3 @@ export function deleteReview(review_id: Key) {
 
   return db.deleteItem(params);
 }
-export default {
-  Query: {},
-  Mutation: {
-    createReview: (root, args) => data.createReview(args)
-  },
-};

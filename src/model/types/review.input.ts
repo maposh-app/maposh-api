@@ -1,5 +1,14 @@
 import { Field, ID, InputType, Int } from "type-graphql";
-import { TopPlaceReviewToken, TopUserReviewToken } from "./review.type";
+import { Review, TopPlaceReviewToken, TopUserReviewToken } from "./review.type";
+
+@InputType()
+export class AddReviewInput implements Partial<Review> {
+  @Field()
+  public review_title: string;
+
+  @Field(type => String, { nullable: true })
+  public review?: string;
+}
 
 @InputType()
 export class TopUserReviewTokenInput implements Partial<TopUserReviewToken> {
@@ -10,7 +19,7 @@ export class TopUserReviewTokenInput implements Partial<TopUserReviewToken> {
   public upvote_count: number;
 
   @Field()
-  public handle: string;
+  public user_id: string;
 }
 
 @InputType()

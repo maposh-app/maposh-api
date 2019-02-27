@@ -27,6 +27,7 @@
     "graphql-tools": "^4.0.4",
     "reflect-metadata": "^0.1.13",
     "type-graphql": "next",
+    "serverless-dynamodb-client": "^0.0.2",
     "uuid": "^3.3.2"
   },
   "devDependencies": {
@@ -63,7 +64,6 @@
     "jest": "^24.1.0",
     "jsonfile": "^5.0.0",
     "prettier": "^1.16.4",
-    "serverless-dynamodb-client": "^0.0.2",
     "serverless-dynamodb-local": "0.2.36",
     "serverless-offline": "^4.7.0",
     "serverless-plugin-typescript": "^1.1.5",

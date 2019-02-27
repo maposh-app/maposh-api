@@ -19,15 +19,15 @@ import { User } from "../types/user.type";
 export class UserResolver {
   @Query(returns => TopUserReviewsConnection, { nullable: true })
   public async getPaginatedUserReviews(
-    @Arg("handle") handle: string,
+    @Arg("user_id") user_id: string,
     @Arg("limit") limit?: number,
     @Arg("nextToken", { nullable: true }) nextToken?: TopUserReviewTokenInput
   ) {
     const params: QueryInput = {
       TableName: "Reviews",
-      KeyConditionExpression: "handle = :v1",
+      KeyConditionExpression: "user_id = :v1",
       ExpressionAttributeValues: {
-        ":v1": handle as AttributeValue
+        ":v1": user_id as AttributeValue
       },
       IndexName: "top-user-reviews",
       ScanIndexForward: false
@@ -60,15 +60,15 @@ export class UserResolver {
   }
 
   @Query(returns => User)
-  public async getUserInfo(@Arg("handle") handle: string) {
-    return db.getByKey("Users", { handle }).then(result => {
+  public async getUserInfo(@Arg("user_id") user_id: string) {
+    return db.getByKey("Users", { user_id }).then(result => {
       return result.Item;
     });
   }
 
   @Query(returns => [Place], { nullable: true })
-  public async getUserFavourites(@Arg("handle") handle: string) {
-    return db.getByKey("Users", { handle }, "favourites").then(result => {
+  public async getUserFavourites(@Arg("user_id") user_id: string) {
+    return db.getByKey("Users", { user_id }, "favourites").then(result => {
       return result.Item
         ? (result.Item.favourites as [string]).map(async (place_id: string) => {
             const placeContainer = await db.getByKey("Places", { place_id });
@@ -80,11 +80,11 @@ export class UserResolver {
 
   @FieldResolver(type => [Place], { nullable: true })
   public async favourites(@Root() user: User) {
-    return this.getUserFavourites(user.handle);
+    return this.getUserFavourites(user.user_id);
   }
 
   @FieldResolver(type => TopUserReviewsConnection, { nullable: true })
   public async reviews(@Root() user: User) {
-    return this.getPaginatedUserReviews(user.handle);
+    return this.getPaginatedUserReviews(user.user_id);
   }
 }

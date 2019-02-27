@@ -1,21 +1,24 @@
+import { Field, ID, ObjectType } from "type-graphql";
 import { Place } from "./place.type";
 import { TopUserReviewsConnection } from "./review.type";
-import { Field, ID, ObjectType } from "type-graphql";
 
 @ObjectType()
 export class User {
   @Field(type => ID)
-  handle: string;
+  public handle: string;
+
+  @Field(type => ID)
+  public user_id: string;
 
   @Field()
-  name: string;
+  public name: string;
 
   @Field()
-  location: string;
+  public location: string;
 
   @Field()
-  created_at: string;
+  public created_at: string;
 
   @Field({ nullable: true })
-  description?: string;
+  public description?: string;
 }

@@ -1,64 +1,67 @@
-import { Field, ID, ObjectType, Int } from "type-graphql";
+import { Field, ID, Int, ObjectType } from "type-graphql";
 
 @ObjectType()
 export class Review {
   @Field(type => ID)
-  review_id: string;
+  public review_id: string;
 
   @Field()
-  place_id: string;
+  public place_id: string;
 
   @Field()
-  handle: string;
+  public user_id: string;
+
+  @Field(type => String, { nullable: true })
+  public review_title?: string;
 
   @Field()
-  review: string;
+  public review: string;
 
   @Field(type => Int)
-  upvote_count: number;
+  public upvote_count: number;
 
   @Field()
-  created_at: string;
+  public created_at: string;
 }
 
 @ObjectType()
 export class TopUserReviewToken {
   @Field(type => ID)
-  review_id: string;
+  public review_id: string;
 
   @Field(type => Int)
-  upvote_count: number;
+  public upvote_count: number;
 
   @Field()
-  handle: string;
+  public user_id: string;
 }
 
 @ObjectType()
 export class TopUserReviewsConnection {
   @Field(type => [Review])
-  items: [Review?];
+  public items: [Review?];
 
   @Field(type => TopUserReviewToken)
-  nextToken?: TopUserReviewToken;
+  public nextToken?: TopUserReviewToken;
 }
 
 @ObjectType()
 export class TopPlaceReviewToken {
   @Field(type => ID)
-  review_id: string;
+  public review_id: string;
 
   @Field(type => Int)
-  upvote_count: number;
+  public upvote_count: number;
 
   @Field()
-  place_id: string;
+  public place_id: string;
 }
 
 @ObjectType()
 export class TopPlaceReviewsConnection {
   @Field(type => [Review])
-  items: [Review?];
+  public items: [Review?];
 
   @Field(type => TopPlaceReviewToken)
-  nextToken?: TopPlaceReviewToken;
+  public nextToken?: TopPlaceReviewToken;
 }

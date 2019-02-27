@@ -1,4 +1,5 @@
 import {
+  AttributeValue,
   DeleteItemInput,
   DeleteItemOutput,
   GetItemInput,
@@ -10,8 +11,7 @@ import {
   ScanInput,
   ScanOutput,
   UpdateItemInput,
-  UpdateItemOutput,
-  AttributeValue
+  UpdateItemOutput
 } from "aws-sdk/clients/dynamodb";
 import { promisify } from "../../../utils/helpers";
 
@@ -24,19 +24,19 @@ if (process.env.NODE_ENV === "production") {
 }
 
 export const scan = (params: ScanInput) => {
-  return promisify<ScanOutput>((callback: Function) =>
+  return promisify<ScanOutput>((callback: Promise<ScanOutput>) =>
     docClient.scan(params, callback)
   );
 };
 
 export const query = (params: QueryInput) => {
-  return promisify<QueryOutput>((callback: Function) =>
+  return promisify<QueryOutput>((callback: Promise<QueryOutput>) =>
     docClient.query(params, callback)
   );
 };
 
 export const get = (params: GetItemInput) => {
-  return promisify<GetItemOutput>((callback: Function) =>
+  return promisify<GetItemOutput>((callback: Promise<GetItemOutput>) =>
     docClient.get(params, callback)
   );
 };
@@ -59,19 +59,19 @@ export function getByKey(
 }
 
 export const createItem = (params: PutItemInput) => {
-  return promisify<PutItemOutput>((callback: Function) =>
+  return promisify<PutItemOutput>((callback: Promise<PutItemOutput>) =>
     docClient.put(params, callback)
   );
 };
 
 export const updateItem = (params: UpdateItemInput) => {
-  return promisify<UpdateItemOutput>((callback: Function) =>
+  return promisify<UpdateItemOutput>((callback: Promise<UpdateItemOutput>) =>
     docClient.update(params, callback)
   );
 };
 
 export const deleteItem = (params: DeleteItemInput) => {
-  return promisify<DeleteItemOutput>((callback: Function) =>
+  return promisify<DeleteItemOutput>((callback: Promise<DeleteItemOutput>) =>
     docClient.delete(params, callback)
   );
 };

@@ -9,17 +9,30 @@ import "reflect-metadata";
 import { buildSchema } from "type-graphql";
 import config from "../../config";
 import * as colors from "../../config/console_colors";
+import { ReviewResolver } from "../../model/resolvers/review.resolver";
 import { UserResolver } from "../../model/resolvers/user.resolver";
 
 const playgroundConfig = (() => {
   const defaultQuery = `
   {
-    getPaginatedUserReviews(handle: "Murl_Wehner", limit: 3) {
-      items {
-        review
+    getUserInfo(user_id:"offlineContext_cognitoIdentityId") {
+      reviews {
+        items{
+          review
+          review_id
+        }
       }
     }
   }
+  # mutation {
+  #   addReview(
+  #     review: "Got an iron shirt and went into the outer space"
+  #     place_id: "c3e62739-0cb2-4806-b5b1-03b47342986a"
+  #     review_title: "Nice"
+  #   ) {
+  #     review
+  #   }
+  # }
   `;
 
   return {
@@ -61,12 +74,15 @@ export default async function bootstrap(
   (global as any).schema =
     (global as any).schema ||
     (await buildSchema({
-      resolvers: [UserResolver]
+      resolvers: [UserResolver, ReviewResolver]
     }));
   const schema = (global as any).schema;
 
   const server = new ApolloServer({
     schema,
+    context: {
+      user_id: event.requestContext.identity.cognitoIdentityId
+    },
     ...loggingConfig,
     ...playgroundConfig
   });

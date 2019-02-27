@@ -3,7 +3,7 @@ const jsonfile = require("jsonfile");
 
 const numPlaces = 10;
 const usersPerPlace = 3;
-const reviewsPerUser = 5
+const reviewsPerUser = 5;
 
 const udata = [];
 const rdata = [];
@@ -18,9 +18,9 @@ for (let i = 0; i < numPlaces; i++) {
 }
 
 for (let i = 0; i < handlePlaceNames.length; i++) {
-  const place_id = faker.random.uuid();
+  const placeId = faker.random.uuid();
   const placeInfo = {
-    place_id: place_id,
+    place_id: placeId,
     name: faker.company.companyName(),
     address: faker.address.streetAddress(),
     city: faker.address.city(),
@@ -33,30 +33,31 @@ for (let i = 0; i < handlePlaceNames.length; i++) {
   pdata.push(placeInfo);
 
   for (let i = 0; i < usersPerPlace; i++) {
-    const favourites = [place_id];
+    const favourites = [placeId];
 
     const name = faker.name.findName();
     const location = faker.address.city();
     const description = faker.name.jobTitle();
 
-    const userId = faker.internet.userName();
+    const handle = faker.internet.userName();
+    const userId = faker.random.uuid();
     const userInfo = {
-      handle: userId,
-      name: name,
-      location: location,
-      description: description,
-      favourites: favourites
+      handle,
+      user_id: userId,
+      name,
+      location,
+      description,
+      favourites
     };
 
     udata.push(userInfo);
-
     for (let j = 0; j < reviewsPerUser; j++) {
-      const id = faker.random.uuid();
+      const reviewId = faker.random.uuid();
 
       const reviewInfo = {
-        handle: userId,
-        review_id: id,
-        place_id: place_id,
+        user_id: userId,
+        review_id: reviewId,
+        placeId,
         review: faker.lorem.sentence(),
         upvote_count: faker.random.number({
           min: 1,
@@ -73,6 +74,17 @@ for (let i = 0; i < handlePlaceNames.length; i++) {
 const ufile = "Users.json";
 const rfile = "Reviews.json";
 const pfile = "Places.json";
+
+const offlineUserInfo = {
+  handle: "me",
+  user_id: "offlineContext_cognitoIdentityId",
+  name: "tester",
+  location: "the Universe",
+  description: "the curious explorer",
+  favourites: []
+};
+
+udata.push(offlineUserInfo);
 
 jsonfile.writeFileSync(ufile, udata, function(err) {
   if (err) {
