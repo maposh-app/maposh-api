@@ -19,6 +19,9 @@ export class Place {
   @Field()
   public state: string;
 
+  @Field()
+  public added_by: string;
+
   @Field(type => Int)
   public rank: number;
 
