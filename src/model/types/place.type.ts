@@ -8,6 +8,9 @@ export class Place {
   public place_id: string;
 
   @Field()
+  public is_open: boolean;
+
+  @Field()
   public name: string;
 
   @Field()
@@ -18,6 +21,9 @@ export class Place {
 
   @Field()
   public state: string;
+
+  @Field()
+  public added_by: string;
 
   @Field(type => Int)
   public rank: number;

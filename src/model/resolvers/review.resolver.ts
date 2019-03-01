@@ -31,7 +31,7 @@ export class ReviewResolver {
       Item: newReview
     } as unknown;
 
-    db.createItem(params as PutItemInput).catch(err => console.log(err));
+    db.createItem(params as PutItemInput);
     return newReview;
   }
 }
@@ -53,13 +53,13 @@ export class ReviewResolver {
 //   return db.updateItem(params);
 // }
 
-export function deleteReview(review_id: Key) {
-  const params = {
-    TableName: "Reviews",
-    Key: {
-      id: review_id
-    }
-  };
+// export function deleteReview(review_id: Key) {
+//   const params = {
+//     TableName: "Reviews",
+//     Key: {
+//       id: review_id
+//     }
+//   };
 
-  return db.deleteItem(params);
-}
+//   return db.deleteItem(params);
+// }
