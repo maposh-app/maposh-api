@@ -1,64 +1,10 @@
-import {
-  AttributeValue,
-  Key,
-  QueryInput,
-  QueryOutput
-} from "aws-sdk/clients/dynamodb";
 import { Arg, FieldResolver, Query, Resolver, Root } from "type-graphql";
 import * as db from "../../service/dynamo";
 import { Place } from "../types/place.type";
-import { TopUserReviewTokenInput } from "../types/review.input";
-import {
-  Review,
-  TopUserReviewsConnection,
-  TopUserReviewToken
-} from "../types/review.type";
 import { User } from "../types/user.type";
 
 @Resolver(of => User)
 export class UserResolver {
-  @Query(returns => TopUserReviewsConnection, { nullable: true })
-  public async getPaginatedUserReviews(
-    @Arg("user_id") user_id: string,
-    @Arg("limit") limit?: number,
-    @Arg("nextToken", { nullable: true }) nextToken?: TopUserReviewTokenInput
-  ) {
-    const params: QueryInput = {
-      TableName: "Reviews",
-      KeyConditionExpression: "user_id = :v1",
-      ExpressionAttributeValues: {
-        ":v1": user_id as AttributeValue
-      },
-      IndexName: "top-user-reviews",
-      ScanIndexForward: false
-    };
-
-    if (limit) {
-      params.Limit = limit;
-    }
-
-    if (nextToken) {
-      params.ExclusiveStartKey = (nextToken as unknown) as Key;
-    }
-    return db.query(params).then((result: QueryOutput) => {
-      const listOfReviews: TopUserReviewsConnection = {
-        items: [] as [Review?]
-      };
-
-      if (result.Items && result.Items.length >= 1) {
-        for (const review of result.Items) {
-          listOfReviews.items.push((review as unknown) as Review);
-        }
-        const token = result.LastEvaluatedKey as unknown;
-        if (token) {
-          listOfReviews.nextToken = token as TopUserReviewToken;
-        }
-      }
-
-      return listOfReviews;
-    });
-  }
-
   @Query(returns => User)
   public async getUserInfo(@Arg("user_id") user_id: string) {
     return db.getByKey("Users", { user_id }).then(result => {
@@ -81,10 +27,5 @@ export class UserResolver {
   @FieldResolver(type => [Place], { nullable: true })
   public async favourites(@Root() user: User) {
     return this.getUserFavourites(user.user_id);
-  }
-
-  @FieldResolver(type => TopUserReviewsConnection, { nullable: true })
-  public async reviews(@Root() user: User) {
-    return this.getPaginatedUserReviews(user.user_id);
   }
 }

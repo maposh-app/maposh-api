@@ -1,6 +1,4 @@
 import { Field, ID, ObjectType } from "type-graphql";
-import { Place } from "./place.type";
-import { TopUserReviewsConnection } from "./review.type";
 
 @ObjectType()
 export class User {

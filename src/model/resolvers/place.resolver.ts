@@ -6,39 +6,7 @@ import { Context } from "../context";
 import { Place } from "../types/place.type";
 
 @Resolver(of => Place)
-export class ReviewResolver {
-  @Mutation(() => Place)
-  public addPlace(
-    @Ctx() ctx: Context,
-    @Arg("address") address: string,
-    @Arg("city") city: string,
-    @Arg("latitude") latitude: number,
-    @Arg("longitude") longitude: number,
-    @Arg("name") name: string,
-    @Arg("state") state: string
-  ): Place {
-    const newPlace: Place = {
-      added_by: ctx.user_id,
-      address,
-      city,
-      is_open: true,
-      latitude,
-      longitude,
-      name,
-      place_id: uuid(),
-      rank: -1,
-      state
-    };
-
-    const params = {
-      TableName: "Reviews",
-      Item: newPlace
-    } as unknown;
-
-    db.createItem(params as PutItemInput)
-    return newPlace;
-  }
-}
+export class ReviewResolver {}
 
 // export function getPlaces() {
 //   const params = {

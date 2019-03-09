@@ -6,9 +6,9 @@ export class RankedPlaceTokenInput implements Partial<RankedPlaceToken> {
   @Field(type => ID)
   public place_id: string;
 
-  @Field(type => Int)
-  public rank: number;
-
   @Field()
   public city: string;
+
+  @Field(type => Int)
+  public upvote_count: number;
 }

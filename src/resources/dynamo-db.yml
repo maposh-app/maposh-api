@@ -24,7 +24,7 @@ Resources:
           AttributeType: S
         - AttributeName: city
           AttributeType: S
-        - AttributeName: rank
+        - AttributeName: upvote_count
           AttributeType: N
       ProvisionedThroughput:
         ReadCapacityUnits: 10
@@ -34,62 +34,6 @@ Resources:
         - IndexName: top-city-places
           KeySchema:
             - AttributeName: city
-              KeyType: HASH
-            - AttributeName: rank
-              KeyType: RANGE
-          Projection:
-            ProjectionType: ALL
-          ProvisionedThroughput:
-            ReadCapacityUnits: 50
-            WriteCapacityUnits: 50
-
-  ReviewsTable:
-    Type: "AWS::DynamoDB::Table"
-    Properties:
-      KeySchema:
-        - AttributeName: review_id
-          KeyType: HASH
-      AttributeDefinitions:
-        - AttributeName: review_id
-          AttributeType: S
-        - AttributeName: upvote_count
-          AttributeType: N
-        - AttributeName: user_id
-          AttributeType: S
-        - AttributeName: place_id
-          AttributeType: S
-        - AttributeName: created_at
-          AttributeType: S
-      ProvisionedThroughput:
-        ReadCapacityUnits: 10
-        WriteCapacityUnits: 10
-      TableName: "Reviews"
-      GlobalSecondaryIndexes:
-        - IndexName: top-user-reviews
-          KeySchema:
-            - AttributeName: user_id
-              KeyType: HASH
-            - AttributeName: upvote_count
-              KeyType: RANGE
-          Projection:
-            ProjectionType: ALL
-          ProvisionedThroughput:
-            ReadCapacityUnits: 50
-            WriteCapacityUnits: 50
-        - IndexName: chronological-place-reviews
-          KeySchema:
-            - AttributeName: place_id
-              KeyType: HASH
-            - AttributeName: created_at
-              KeyType: RANGE
-          Projection:
-            ProjectionType: ALL
-          ProvisionedThroughput:
-            ReadCapacityUnits: 50
-            WriteCapacityUnits: 50
-        - IndexName: top-place-reviews
-          KeySchema:
-            - AttributeName: place_id
               KeyType: HASH
             - AttributeName: upvote_count
               KeyType: RANGE
