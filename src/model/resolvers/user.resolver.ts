@@ -1,31 +1,46 @@
-import { Arg, FieldResolver, Query, Resolver, Root } from "type-graphql";
+import {
+  Arg,
+  Ctx,
+  FieldResolver,
+  Mutation,
+  Query,
+  Resolver,
+  Root
+} from "type-graphql";
 import * as db from "../../service/dynamo";
+import { Context } from "../context";
 import { Place } from "../types/place.type";
 import { User } from "../types/user.type";
 
-@Resolver(of => User)
+@Resolver(() => User)
 export class UserResolver {
-  @Query(returns => User)
-  public async getUserInfo(@Arg("user_id") user_id: string) {
-    return db.getByKey("Users", { user_id }).then(result => {
-      return result.Item;
-    });
+  @Query(() => User)
+  public async getUserInfo(@Arg("userID") userID: string) {
+    const userInfo = await db.getByKey("Users", { userID });
+    return userInfo.Item;
   }
 
-  @Query(returns => [Place], { nullable: true })
-  public async getUserFavourites(@Arg("user_id") user_id: string) {
-    return db.getByKey("Users", { user_id }, "favourites").then(result => {
-      return result.Item
-        ? (result.Item.favourites as [string]).map(async (place_id: string) => {
-            const placeContainer = await db.getByKey("Places", { place_id });
-            return placeContainer.Item;
-          })
-        : [];
-    });
+  @Query(() => [Place], { nullable: true })
+  public async getUserFavourites(@Arg("userID") userID: string) {
+    const favourites = await db.getByKey("Users", { userID }, "favourites");
+    return favourites;
   }
 
-  @FieldResolver(type => [Place], { nullable: true })
+  @Mutation(() => User)
+  public async addFavourite(
+    @Ctx() ctx: Context,
+    @Arg("placeID") placeID: string
+  ) {
+    const newUser = await db.appendToAttributes(
+      "Users",
+      { userID: ctx.userID },
+      { favourites: [placeID] }
+    );
+    return newUser;
+  }
+
+  @FieldResolver(() => [Place], { nullable: true })
   public async favourites(@Root() user: User) {
-    return this.getUserFavourites(user.user_id);
+    return this.getUserFavourites(user.userID);
   }
 }

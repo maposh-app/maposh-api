@@ -2,6 +2,7 @@ import {
   AttributeValue,
   DeleteItemInput,
   DeleteItemOutput,
+  ExpressionAttributeNameMap,
   GetItemInput,
   GetItemOutput,
   PutItemInput,
@@ -13,7 +14,8 @@ import {
   UpdateItemInput,
   UpdateItemOutput
 } from "aws-sdk/clients/dynamodb";
-import { promisify } from "../../../utils/helpers";
+import _ from "lodash";
+import { promisify } from "../../utils/helpers";
 
 let docClient = require("serverless-dynamodb-client").doc;
 
@@ -43,7 +45,7 @@ export const get = (params: GetItemInput) => {
 
 export function getByKey(
   tableName: string,
-  key: { [prop: string]: string },
+  key: { [prop: string]: string | number },
   ...attributes: string[]
 ) {
   const params: GetItemInput = {
@@ -69,6 +71,102 @@ export const updateItem = (params: UpdateItemInput) => {
     docClient.update(params, callback)
   );
 };
+
+export function appendToAttributes(
+  tableName: string,
+  key: { [prop: string]: string | number },
+  attributes: { [attribute: string]: [string | number | boolean] }
+) {
+  const UpdateExpression = `SET ${Object.keys(attributes)
+    .map(
+      attribute => `#${attribute} = list_append(${attribute}, :${attribute})`
+    )
+    .join()}`;
+
+  const ExpressionAttributeValues = _.transform(
+    attributes,
+    (result, value, attribute) => {
+      result[`:${attribute}`] = value;
+    }
+  );
+
+  const ExpressionAttributeNames = _.transform(
+    attributes,
+    (result, _value, attribute) => {
+      result[`#${attribute}`] = attribute;
+    }
+  ) as ExpressionAttributeNameMap;
+
+  const ConditionExpression = Object.keys(attributes)
+    .map(attribute => `attribute_exists(${attribute})`)
+    .join();
+
+  const params: UpdateItemInput = {
+    TableName: tableName,
+    Key: key as { [prop: string]: AttributeValue },
+    UpdateExpression,
+    ExpressionAttributeNames,
+    ExpressionAttributeValues,
+    ConditionExpression,
+    ReturnValues: "UPDATED_NEW"
+  };
+
+  return updateItem(params).catch(() => {
+    const newUpdateExpression = `SET ${Object.keys(attributes)
+      .map(attribute => `${attribute} = :${attribute}`)
+      .join()}`;
+
+    const newConditionExpression = Object.keys(attributes)
+      .map(attribute => `attribute_not_exists(${attribute})`)
+      .join();
+
+    const newParams: UpdateItemInput = {
+      TableName: tableName,
+      Key: key as { [prop: string]: AttributeValue },
+      UpdateExpression: newUpdateExpression,
+      ExpressionAttributeNames,
+      ExpressionAttributeValues,
+      ConditionExpression: newConditionExpression,
+      ReturnValues: "UPDATED_NEW"
+    };
+    return updateItem(newParams);
+  });
+}
+
+export function incrementAttributes(
+  tableName: string,
+  key: { [prop: string]: string | number },
+  attributes: { [attribute: string]: number }
+) {
+  const UpdateExpression = `add ${Object.keys(attributes)
+    .map(attribute => `#${attribute} :${attribute}`)
+    .join()}`;
+
+  const ExpressionAttributeNames = _.transform(
+    attributes,
+    (result, _value, attribute) => {
+      result[`#${attribute}`] = attribute;
+    }
+  ) as ExpressionAttributeNameMap;
+
+  const ExpressionAttributeValues = _.transform(
+    attributes,
+    (result, value, attribute) => {
+      result[`:${attribute}`] = value;
+    }
+  );
+
+  const params: UpdateItemInput = {
+    TableName: tableName,
+    Key: key as { [prop: string]: AttributeValue },
+    UpdateExpression,
+    ExpressionAttributeValues,
+    ExpressionAttributeNames,
+    ReturnValues: "UPDATED_NEW"
+  };
+
+  return updateItem(params);
+}
 
 export const deleteItem = (params: DeleteItemInput) => {
   return promisify<DeleteItemOutput>((callback: Promise<DeleteItemOutput>) =>

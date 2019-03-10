@@ -3,10 +3,10 @@ Resources:
     Type: "AWS::DynamoDB::Table"
     Properties:
       KeySchema:
-        - AttributeName: user_id
+        - AttributeName: userID
           KeyType: HASH
       AttributeDefinitions:
-        - AttributeName: user_id
+        - AttributeName: userID
           AttributeType: S
       ProvisionedThroughput:
         ReadCapacityUnits: 10
@@ -17,14 +17,14 @@ Resources:
     Type: "AWS::DynamoDB::Table"
     Properties:
       KeySchema:
-        - AttributeName: place_id
+        - AttributeName: placeID
           KeyType: HASH
       AttributeDefinitions:
-        - AttributeName: place_id
+        - AttributeName: placeID
           AttributeType: S
         - AttributeName: city
           AttributeType: S
-        - AttributeName: upvote_count
+        - AttributeName: upvoteCount
           AttributeType: N
       ProvisionedThroughput:
         ReadCapacityUnits: 10
@@ -35,7 +35,7 @@ Resources:
           KeySchema:
             - AttributeName: city
               KeyType: HASH
-            - AttributeName: upvote_count
+            - AttributeName: upvoteCount
               KeyType: RANGE
           Projection:
             ProjectionType: ALL

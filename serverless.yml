@@ -29,11 +29,9 @@ custom:
       test:
         sources:
           - table: Users
-            sources: [utils/seed-data/Users.json]
-          - table: Reviews
-            sources: [utils/seed-data/Reviews.json]
+            sources: [./src/utils/seed-data/Users.json]
           - table: Places
-            sources: [utils/seed-data/Places.json]
+            sources: [./src/utils/seed-data/Places.json]
 
 functions:
   graphql:

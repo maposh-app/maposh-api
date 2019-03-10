@@ -1,34 +1,31 @@
-import { Field, Float, ID, Int, ObjectType } from "type-graphql";
+import { Field, ID, Int, ObjectType } from "type-graphql";
 import { User } from "./user.type";
 
 @ObjectType()
 export class Place {
-  @Field(type => ID)
-  public place_id: string;
-
-  @Field()
-  public name: string;
+  @Field(() => ID)
+  public placeID: string;
 
   @Field()
   public city: string;
 
-  @Field(type => Int)
-  public upvote_count: number;
+  @Field(() => Int)
+  public upvoteCount: number;
 
   @Field()
-  public added_by: string;
+  public addedBy: string;
 
-  @Field(type => [User], { nullable: true })
+  @Field(() => [User], { nullable: true })
   public followers?: [User];
 }
 
 @ObjectType()
 export class RankedPlaceToken {
-  @Field(type => ID)
-  public place_id: string;
+  @Field(() => ID)
+  public placeID: string;
 
-  @Field(type => Int)
-  public upvote_count: number;
+  @Field(() => Int)
+  public upvoteCount: number;
 
   @Field()
   public city: string;
@@ -36,9 +33,9 @@ export class RankedPlaceToken {
 
 @ObjectType()
 export class TopCityPlacesConnection {
-  @Field(type => [Place])
+  @Field(() => [Place])
   public items: [Place?];
 
-  @Field(type => RankedPlaceToken)
+  @Field(() => RankedPlaceToken)
   public nextToken?: RankedPlaceToken;
 }

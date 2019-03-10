@@ -1,3 +1,4 @@
 export interface Context {
-  user_id: string;
+  userID: string;
+  location: string;
 }

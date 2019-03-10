@@ -9,28 +9,25 @@ import "reflect-metadata";
 import { buildSchema } from "type-graphql";
 import config from "../../config";
 import * as colors from "../../config/console_colors";
-import { ReviewResolver } from "../../model/resolvers/review.resolver";
+import { PlaceResolver } from "../../model/resolvers/place.resolver";
 import { UserResolver } from "../../model/resolvers/user.resolver";
 
 const playgroundConfig = (() => {
   const defaultQuery = `
   {
-    getUserInfo(user_id:"offlineContext_cognitoIdentityId") {
-      reviews {
-        items{
-          review
-          review_id
-        }
-      }
+    getUserInfo(userID:"offlineContext_cognitoIdentityId") {
+      name
+    }
+    getPlaceInfo(placeID:"b8c4087f-b979-47ce-a1b4-9db67704a9ab") {
+      city
     }
   }
   # mutation {
-  #   addReview(
-  #     review: "Got an iron shirt and went into the outer space"
-  #     place_id: "c3e62739-0cb2-4806-b5b1-03b47342986a"
-  #     review_title: "Nice"
+  #   addPlace(
+  #     placeID: "0"
+  #     city: "Nice"
   #   ) {
-  #     review
+  #     upvoteCount
   #   }
   # }
   `;
@@ -74,14 +71,14 @@ export default async function bootstrap(
   (global as any).schema =
     (global as any).schema ||
     (await buildSchema({
-      resolvers: [UserResolver, ReviewResolver]
+      resolvers: [UserResolver, PlaceResolver]
     }));
   const schema = (global as any).schema;
 
   const server = new ApolloServer({
     schema,
     context: {
-      user_id: event.requestContext.identity.cognitoIdentityId
+      userID: event.requestContext.identity.cognitoIdentityId
     },
     ...loggingConfig,
     ...playgroundConfig
