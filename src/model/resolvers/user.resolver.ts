@@ -22,25 +22,28 @@ export class UserResolver {
 
   @Query(() => [Place], { nullable: true })
   public async getUserFavourites(@Arg("userID") userID: string) {
-    const favourites = await db.getByKey("Users", { userID }, "favourites");
-    return favourites;
-  }
-
-  @Mutation(() => User)
-  public async addFavourite(
-    @Ctx() ctx: Context,
-    @Arg("placeID") placeID: string
-  ) {
-    const newUser = await db.appendToAttributes(
-      "Users",
-      { userID: ctx.userID },
-      { favourites: [placeID] }
-    );
-    return newUser;
+    const result = await db.getByKey("Users", { userID }, "favourites");
+    return result.Item
+      ? (result.Item.favourites as [string]).map(async (place_id: string) => {
+          const placeContainer = await db.getByKey("Places", { place_id });
+          return placeContainer.Item;
+        })
+      : [];
   }
 
   @FieldResolver(() => [Place], { nullable: true })
-  public async favourites(@Root() user: User) {
+  public favourites(@Root() user: User) {
     return this.getUserFavourites(user.userID);
+  }
+
+  @Mutation(() => Boolean)
+  public addFavourite(@Ctx() ctx: Context, @Arg("placeID") placeID: string) {
+    db.appendToAttributes(
+      "Users",
+      { userID: ctx.userID },
+      { favourites: [placeID] }
+    )
+      .then(() => true)
+      .catch(() => false);
   }
 }
