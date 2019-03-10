@@ -1,4 +1,4 @@
-service: serverless-graphql-dynamo
+service: maposh
 
 frameworkVersion: ">=1.21.0 <2.0.0"
 
@@ -6,10 +6,15 @@ provider:
   name: aws
   runtime: nodejs8.10
   stage: dev
+  profile: ${self:custom.profile.${self:custom.stage}}
   region: us-east-1
 
 custom:
   stage: ${opt:stage, self:provider.stage}
+  profile:
+    prod: prodMaposh
+    staging: stagingMaposh
+    dev: default
 
   webpack:
     webpackConfig: webpack.config.js
@@ -35,7 +40,7 @@ custom:
 
 functions:
   graphql:
-    handler: ./src/handler.graphql
+    handler: src/handler.graphqlHandler
     role: ServiceRole
     events:
       - http:

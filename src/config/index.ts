@@ -1,4 +1,4 @@
-import { isProd } from "./environment";
+import { isProd, isStaging } from "./environment";
 
 const {
   GRAPHQL_EXPLORE,
@@ -18,6 +18,7 @@ export default {
   GRAPHQL_WS,
 
   isProd,
+  isStaging,
 
   PORT,
   SSL,

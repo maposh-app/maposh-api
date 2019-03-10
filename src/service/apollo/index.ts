@@ -1,10 +1,5 @@
 import { ApolloServer } from "apollo-server-lambda";
-import {
-  APIGatewayProxyEvent,
-  APIGatewayProxyResult,
-  Callback,
-  Context
-} from "aws-lambda";
+import { APIGatewayProxyEvent } from "aws-lambda";
 import "reflect-metadata";
 import { buildSchema } from "type-graphql";
 import config from "../../config";
@@ -49,13 +44,13 @@ const playgroundConfig = (() => {
 const loggingConfig = (() => {
   return {
     formatError: (error: any) => {
-      if (!config.isProd) {
+      if (!config.isProd && !config.isStaging) {
         console.log(colors.error(error));
       }
       return error;
     },
     formatResponse: (response: any) => {
-      if (!config.isProd) {
+      if (!config.isProd && !config.isStaging) {
         console.log(colors.info(response));
       }
       return response;
@@ -63,11 +58,7 @@ const loggingConfig = (() => {
   };
 })();
 
-export default async function bootstrap(
-  event: APIGatewayProxyEvent,
-  context: Context,
-  callback: Callback<APIGatewayProxyResult>
-) {
+export default async function bootstrapHandler(event: APIGatewayProxyEvent) {
   (global as any).schema =
     (global as any).schema ||
     (await buildSchema({
@@ -83,5 +74,9 @@ export default async function bootstrap(
     ...loggingConfig,
     ...playgroundConfig
   });
-  server.createHandler()(event, context, callback);
+  return server.createHandler({
+    cors: {
+      origin: "true",
+    }
+  });
 }

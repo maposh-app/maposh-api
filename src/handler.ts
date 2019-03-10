@@ -4,12 +4,12 @@ import {
   Callback,
   Context
 } from "aws-lambda";
-import bootstrap from "./service/apollo";
+import bootstrapHandler from "./service/apollo";
 
-export function graphql(
+export const graphqlHandler = (
   event: APIGatewayProxyEvent,
   context: Context,
   callback: Callback<APIGatewayProxyResult>
-) {
-  bootstrap(event, context, callback);
-}
+) => {
+  bootstrapHandler(event).then(handler => handler(event, context, callback));
+};

@@ -29,7 +29,5 @@ Resources:
                 Resource:
                   - "arn:aws:dynamodb:us-east-1:*:table/Users"
                   - "arn:aws:dynamodb:us-east-1:*:table/Users/*"
-                  - "arn:aws:dynamodb:us-east-1:*:table/Reviews"
-                  - "arn:aws:dynamodb:us-east-1:*:table/Reviews/*"
                   - "arn:aws:dynamodb:us-east-1:*:table/Places"
                   - "arn:aws:dynamodb:us-east-1:*:table/Places/*"
