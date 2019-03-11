@@ -18,7 +18,8 @@ allUsers.forEach(user => {
     Item: {
       handle: user.handle,
       userID: user.userID,
-      name: user.name,
+      firstName: user.firstName,
+      lastName: user.lastName,
       location: user.location,
       description: user.description,
       favourites: user.favourites
@@ -29,12 +30,12 @@ allUsers.forEach(user => {
     if (err) {
       console.error(
         "Unable to add user",
-        user.name,
+        user.firstName,
         ". Error JSON:",
         JSON.stringify(err, null, 2)
       );
     } else {
-      console.log("PutItem succeeded:", user.name);
+      console.log("PutItem succeeded:", user.firstName);
     }
   });
 });

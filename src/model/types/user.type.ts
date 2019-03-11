@@ -9,7 +9,10 @@ export class User {
   public userID: string;
 
   @Field()
-  public name: string;
+  public firstName: string;
+
+  @Field()
+  public lastName: string;
 
   @Field()
   public location: string;

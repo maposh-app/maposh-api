@@ -11,7 +11,8 @@ const playgroundConfig = (() => {
   const defaultQuery = `
   {
     getUserInfo(userID:"offlineContext_cognitoIdentityId") {
-      name
+      firstName
+      lastName
     }
     getPlaceInfo(placeID:"b8c4087f-b979-47ce-a1b4-9db67704a9ab") {
       city
@@ -76,7 +77,7 @@ export default async function bootstrapHandler(event: APIGatewayProxyEvent) {
   });
   return server.createHandler({
     cors: {
-      origin: "true",
+      origin: "true"
     }
   });
 }

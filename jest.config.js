@@ -2,8 +2,7 @@ module.exports = {
   roots: ["<rootDir>/src"],
   testRegex: "(.*\\.test\\.(tsx?|jsx?))$",
   transform: {
-    "^.+\\.(graphql|gql)$": "./utils/transformers/gql.js",
-    "^.+\\.(js|jsx|ts|tsx)$": "./utils/transformers/jsts.js"
+    "^.+\\.tsx?$": "ts-jest"
   },
   moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json", "node"]
 };
