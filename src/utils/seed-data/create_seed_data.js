@@ -10,7 +10,8 @@ const udata = [];
 const offlineUserInfo = {
   handle: "me",
   userID: "offlineContext_cognitoIdentityId",
-  name: "tester",
+  firstName: "tester",
+  lastName: "tester",
   location: "the Universe",
   description: "the curious explorer",
   favourites: []
@@ -39,7 +40,8 @@ for (let i = 0; i < handlePlaceNames.length; i += 1) {
   for (let j = 0; j < usersPerPlace; j += 1) {
     const favourites = [placeId];
 
-    const name = faker.name.findName();
+    const firstName = faker.name.firstName();
+    const lastName = faker.name.lastName();
     const location = faker.address.city();
     const description = faker.name.jobTitle();
 
@@ -48,7 +50,8 @@ for (let i = 0; i < handlePlaceNames.length; i += 1) {
     const userInfo = {
       handle,
       userID,
-      name,
+      firstName,
+      lastName,
       location,
       description,
       favourites

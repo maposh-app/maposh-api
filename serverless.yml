@@ -8,6 +8,19 @@ provider:
   stage: dev
   profile: ${self:custom.profile.${self:custom.stage}}
   region: us-east-1
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:DescribeTable
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource:
+        - "Fn::GetAtt": [PlacesTable, Arn]
+        - "Fn::GetAtt": [UserTable, Arn]
 
 custom:
   stage: ${opt:stage, self:provider.stage}
@@ -41,19 +54,21 @@ custom:
 functions:
   graphql:
     handler: src/handler.graphqlHandler
-    role: ServiceRole
     events:
       - http:
           path: graphql
           method: post
           cors: true
+          authorizer: aws_iam
+
       - http:
           path: graphql
           method: get
+          cors: true
+          authorizer: aws_iam
 
 resources:
-  - ${file(src/resources/iam-dynamo.yml)}
-  - ${file(src/resources/iam-x-ray.yml)}
+  - ${file(src/resources/api-gateway-errors.yml)}
   - ${file(src/resources/dynamo-db.yml)}
   - ${file(src/resources/cognito-user-pool.yml)}
   - ${file(src/resources/cognito-identity-pool.yml)}
