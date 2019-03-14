@@ -9,6 +9,8 @@ Resources:
         - email
       AutoVerifiedAttributes:
         - email
+      EmailVerificationMessage: Your ${self:service.name} verification code is {####}.
+      EmailVerificationSubject: ${self:service.name} | Account Verification
 
   CognitoUserPoolClient:
     Type: AWS::Cognito::UserPoolClient

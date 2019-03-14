@@ -1,6 +1,7 @@
 Resources:
   UserTable:
     Type: "AWS::DynamoDB::Table"
+    DeletionPolicy: Retain
     Properties:
       KeySchema:
         - AttributeName: userID
@@ -10,11 +11,12 @@ Resources:
           AttributeType: S
       ProvisionedThroughput:
         ReadCapacityUnits: 10
-        WriteCapacityUnits: 10
+        WriteCapacityUnits: 1
       TableName: "Users"
 
   PlacesTable:
     Type: "AWS::DynamoDB::Table"
+    DeletionPolicy: Retain
     Properties:
       KeySchema:
         - AttributeName: placeID
@@ -28,7 +30,7 @@ Resources:
           AttributeType: N
       ProvisionedThroughput:
         ReadCapacityUnits: 10
-        WriteCapacityUnits: 10
+        WriteCapacityUnits: 1
       TableName: "Places"
       GlobalSecondaryIndexes:
         - IndexName: top-city-places
