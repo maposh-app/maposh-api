@@ -77,7 +77,9 @@ export default async function bootstrapHandler(event: APIGatewayProxyEvent) {
   });
   return server.createHandler({
     cors: {
-      origin: "true"
+      // origin: ["https://maposh.com", "https://staging.maposh.com"],
+      origin: "*",
+      credentials: true
     }
   });
 }

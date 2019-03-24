@@ -29,7 +29,7 @@ Resources:
         - AttributeName: upvoteCount
           AttributeType: N
       ProvisionedThroughput:
-        ReadCapacityUnits: 10
+        ReadCapacityUnits: 5
         WriteCapacityUnits: 1
       TableName: "Places"
       GlobalSecondaryIndexes:
@@ -42,5 +42,5 @@ Resources:
           Projection:
             ProjectionType: ALL
           ProvisionedThroughput:
-            ReadCapacityUnits: 50
-            WriteCapacityUnits: 50
+            ReadCapacityUnits: 5
+            WriteCapacityUnits: 1

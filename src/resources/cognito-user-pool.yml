@@ -9,6 +9,8 @@ Resources:
         - email
       AutoVerifiedAttributes:
         - email
+      EmailConfiguration:
+        ReplyToEmailAddress: support@maposh.com
       EmailVerificationMessage: Your ${self:service.name} verification code is {####}.
       EmailVerificationSubject: ${self:service.name} | Account Verification
 
