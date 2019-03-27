@@ -1,10 +1,10 @@
 {
-  "name": "serverless-graphql",
-  "version": "0.0.0",
-  "private": true,
+  "name": "maposh-ai",
+  "version": "0.0.1",
+  "private": false,
   "repository": {
     "type": "git",
-    "url": "git@github.com:serverless/serverless-graphql.git"
+    "url": "https://github.com/maposh-app/maposh-api"
   },
   "scripts": {
     "pretest": "./src/utils/scripts/pre.sh",
