@@ -20,12 +20,21 @@ export class UserResolver {
     return userInfo.Item;
   }
 
+  @Query(() => User)
+  public async meInfo(@Ctx() ctx: Context) {
+    const userInfo = await db.getByKey("Users", { userID: ctx.userID });
+    return userInfo.Item;
+  }
+
   @Query(() => [Place], { nullable: true })
   public async getUserFavourites(@Arg("userID") userID: string) {
     const result = await db.getByKey("Users", { userID }, "favourites");
-    return result.Item
-      ? (result.Item.favourites as [string]).map(async (place_id: string) => {
-          const placeContainer = await db.getByKey("Places", { place_id });
+    // if (result.Item) {
+    //   console.log((result.Item.favourites as Set<string>).values);
+    // }
+    return result.Item && result.Item.favourites
+      ? (result.Item.favourites as any).values.map(async (placeID: string) => {
+          const placeContainer = await db.getByKey("Places", { placeID });
           return placeContainer.Item;
         })
       : [];
@@ -38,11 +47,12 @@ export class UserResolver {
 
   @Mutation(() => Boolean)
   public addFavourite(@Ctx() ctx: Context, @Arg("placeID") placeID: string) {
-    db.appendToAttributes(
-      "Users",
-      { userID: ctx.userID },
-      { favourites: [placeID] }
-    )
+    return db
+      .appendToAttributes(
+        "Users",
+        { userID: ctx.userID },
+        { favourites: [placeID] }
+      )
       .then(() => true)
       .catch(() => false);
   }

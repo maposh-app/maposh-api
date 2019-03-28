@@ -1,5 +1,4 @@
 import { Field, ID, Int, ObjectType } from "type-graphql";
-import { User } from "./user.type";
 
 @ObjectType()
 export class Place {
@@ -11,12 +10,6 @@ export class Place {
 
   @Field(() => Int)
   public upvoteCount: number;
-
-  @Field()
-  public addedBy: string;
-
-  @Field(() => [User], { nullable: true })
-  public followers?: [User];
 }
 
 @ObjectType()

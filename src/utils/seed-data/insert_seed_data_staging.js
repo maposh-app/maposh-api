@@ -10,7 +10,7 @@ const docClient = new AWS.DynamoDB.DocumentClient();
 console.log("Importing data into DynamoDB. Please wait.");
 
 const allUsers = JSON.parse(fs.readFileSync("Users.json", "utf8"));
-const allTweets = JSON.parse(fs.readFileSync("Places.json", "utf8"));
+const allPlaces = JSON.parse(fs.readFileSync("Places.json", "utf8"));
 
 allUsers.forEach(user => {
   const Userparams = {
@@ -22,7 +22,7 @@ allUsers.forEach(user => {
       lastName: user.lastName,
       location: user.location,
       description: user.description,
-      favourites: user.favourites
+      favourites: docClient.createSet(user.favourites)
     }
   };
 
@@ -40,14 +40,14 @@ allUsers.forEach(user => {
   });
 });
 
-allTweets.forEach(place => {
+allPlaces.forEach(place => {
   const Placeparams = {
     TableName: "Places",
     Item: {
       placeID: place.placeID,
       city: place.city,
       upvoteCount: place.upvoteCount,
-      addedBy: place.addedBy
+      followers: place.followers
     }
   };
 

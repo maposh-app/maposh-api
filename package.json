@@ -1,6 +1,7 @@
 {
-  "name": "maposh-ai",
+  "name": "maposh-api",
   "version": "0.0.1",
+  "license": "MIT",
   "private": false,
   "repository": {
     "type": "git",
@@ -78,6 +79,7 @@
     "tslint-config-prettier": "^1.18.0",
     "tslint-react": "^3.6.0",
     "typescript": "^3.3.3333",
+    "uglifyjs-webpack-plugin": "^2.1.2",
     "webpack": "^4.29.5",
     "webpack-node-externals": "^1.6.0"
   }

@@ -1,4 +1,5 @@
 import {
+  AttributeValue,
   PutItemInput,
   PutItemInputAttributeMap
 } from "aws-sdk/clients/dynamodb";
@@ -21,11 +22,11 @@ export class PlaceResolver {
     @Arg("placeID") placeID: string,
     @Arg("city") city: string
   ) {
-    const newPlace: Place = {
+    const newPlace: Place & { followers: string[] } = {
       placeID,
       city,
       upvoteCount: 0,
-      addedBy: ctx.userID
+      followers: [ctx.userID]
     };
 
     const params: PutItemInput = {
@@ -39,18 +40,76 @@ export class PlaceResolver {
   }
 
   @Mutation(() => Boolean)
-  public upvotePlace(@Arg("placeID") placeID: string) {
-    return db
-      .incrementAttributes("Places", { placeID }, { upvoteCount: 1 })
-      .then(() => true)
-      .catch(() => false);
+  public upvotePlace(
+    @Ctx() ctx: Context,
+    @Arg("placeID") placeID: string,
+    @Arg("city") city: string
+  ) {
+    return (
+      db
+        .modifyAttributes(
+          "Users",
+          { userID: ctx.userID },
+          { favourites: [placeID] }
+        )
+        .then(() =>
+          db.modifyAttributes(
+            "Places",
+            { placeID },
+            {
+              upvoteCount: 1,
+              followers: [ctx.userID]
+            },
+            {
+              city: city as AttributeValue
+            }
+          )
+        )
+        // .then(() =>
+        //   db.appendToAttributes(
+        //     "Places",
+        //     { placeID },
+        //     { followers: [ctx.userID] }
+        //   )
+        // )
+        .then(() => true)
+        .catch(err => {
+          console.log(err);
+          return err;
+        })
+    );
   }
 
   @Mutation(() => Boolean)
-  public downvotePlace(@Arg("placeID") placeID: string) {
+  public downvotePlace(
+    @Ctx() ctx: Context,
+    @Arg("placeID") placeID: string,
+    @Arg("city") city: string
+  ) {
     return db
-      .incrementAttributes("Places", { placeID }, { upvoteCount: -1 })
+      .deleteFromSetAttribute(
+        "Users",
+        { userID: ctx.userID },
+        "favourites",
+        placeID
+      )
+      .then(() =>
+        db.modifyAttributes(
+          "Places",
+          { placeID },
+          { upvoteCount: -1 },
+          {
+            city: city as AttributeValue
+          }
+        )
+      )
+      .then(() =>
+        db.deleteFromSetAttribute("Places", { placeID }, "followers", ctx.userID)
+      )
       .then(() => true)
-      .catch(() => false);
+      .catch(err => {
+        console.log(err);
+        return err;
+      });
   }
 }

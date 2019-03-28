@@ -1,8 +1,11 @@
 import {
+  AttributeName,
   AttributeValue,
+  ConditionExpression,
   DeleteItemInput,
   DeleteItemOutput,
   ExpressionAttributeNameMap,
+  ExpressionAttributeValueMap,
   GetItemInput,
   GetItemOutput,
   PutItemInput,
@@ -97,7 +100,7 @@ export function appendToAttributes(
     }
   ) as ExpressionAttributeNameMap;
 
-  const ConditionExpression = Object.keys(attributes)
+  const Conditions: ConditionExpression = Object.keys(attributes)
     .map(attribute => `attribute_exists(${attribute})`)
     .join();
 
@@ -107,7 +110,7 @@ export function appendToAttributes(
     UpdateExpression,
     ExpressionAttributeNames,
     ExpressionAttributeValues,
-    ConditionExpression,
+    ConditionExpression: Conditions,
     ReturnValues: "UPDATED_NEW"
   };
 
@@ -133,33 +136,105 @@ export function appendToAttributes(
   });
 }
 
-export function incrementAttributes(
+export function deleteFromSetAttribute(
   tableName: string,
   key: { [prop: string]: string | number },
-  attributes: { [attribute: string]: number }
+  attribute: AttributeName,
+  value: string | number | Array<string | number>
 ) {
-  const UpdateExpression = `add ${Object.keys(attributes)
-    .map(attribute => `#${attribute} :${attribute}`)
-    .join()}`;
-
-  const ExpressionAttributeNames = _.transform(
-    attributes,
-    (result, _value, attribute) => {
-      result[`#${attribute}`] = attribute;
-    }
-  ) as ExpressionAttributeNameMap;
-
-  const ExpressionAttributeValues = _.transform(
-    attributes,
-    (result, value, attribute) => {
-      result[`:${attribute}`] = value;
-    }
-  );
+  const UpdateExpression = `DELETE #${attribute} :${attribute}`;
+  const ExpressionAttributeNames: ExpressionAttributeNameMap = {};
+  ExpressionAttributeNames[`#${attribute}`] = attribute;
+  const ExpressionAttributeValues: ExpressionAttributeValueMap = {};
+  ExpressionAttributeValues[`:${attribute}`] = docClient.createSet(
+    value
+  ) as AttributeValue;
 
   const params: UpdateItemInput = {
     TableName: tableName,
     Key: key as { [prop: string]: AttributeValue },
     UpdateExpression,
+    ExpressionAttributeNames,
+    ExpressionAttributeValues,
+    ReturnValues: "UPDATED_NEW"
+  };
+
+  return updateItem(params);
+}
+
+export function modifyAttributes(
+  tableName: string,
+  key: { [prop: string]: string | number },
+  increments?: { [attribute: string]: number | Array<string | number> },
+  properties?: { [attribute: string]: AttributeValue }
+) {
+  const UpdateExpression: string[] = [];
+  // const Conditions: ConditionExpression[] = [];
+  let ExpressionAttributeNames: ExpressionAttributeNameMap = {};
+  let ExpressionAttributeValues: ExpressionAttributeValueMap = {};
+
+  if (increments) {
+    UpdateExpression.push(
+      `ADD ${Object.keys(increments)
+        .map(attribute => `#${attribute} :${attribute}`)
+        .join()}`
+    );
+
+    ExpressionAttributeNames = _.transform(
+      increments,
+      (result, _value, attribute) => {
+        result[`#${attribute}`] = attribute;
+      }
+    );
+
+    ExpressionAttributeValues = _.transform(
+      increments,
+      (result, value, attribute) => {
+        console.log(docClient.createSet(value));
+        result[`:${attribute}`] = Array.isArray(value)
+          ? docClient.createSet(value)
+          : (value as AttributeValue);
+      }
+    );
+    // Conditions.push(
+    //   Object.keys(increments)
+    //     .map(attribute => `attribute_exists(${attribute})`)
+    //     .join()
+    // );
+  }
+
+  if (properties) {
+    UpdateExpression.push(
+      `SET ${Object.keys(properties)
+        .map(attribute => `#${attribute} = :${attribute}`)
+        .join()}`
+    );
+
+    ExpressionAttributeNames = {
+      ...ExpressionAttributeNames,
+      ..._.transform(properties, (result, _value, attribute) => {
+        result[`#${attribute}`] = attribute;
+      })
+    };
+
+    ExpressionAttributeValues = {
+      ...ExpressionAttributeValues,
+      ..._.transform(properties, (result, value, attribute) => {
+        result[`:${attribute}`] = value;
+      })
+    };
+    // Conditions.push(
+    //   Object.keys(properties)
+    //     .map(attribute => `attribute_exists(${attribute})`)
+    //     .join()
+    // );
+  }
+
+  const params: UpdateItemInput = {
+    TableName: tableName,
+    Key: key as { [prop: string]: AttributeValue },
+    UpdateExpression: UpdateExpression.join(" "),
+    // ConditionExpression: Conditions.join(),
     ExpressionAttributeValues,
     ExpressionAttributeNames,
     ReturnValues: "UPDATED_NEW"
