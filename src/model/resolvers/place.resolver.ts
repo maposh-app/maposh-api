@@ -16,68 +16,44 @@ export class PlaceResolver {
     return placeInfo.Item;
   }
 
-  @Mutation(() => Place)
-  public addPlace(
-    @Ctx() ctx: Context,
-    @Arg("placeID") placeID: string,
-    @Arg("city") city: string
-  ) {
-    const newPlace: Place & { followers: string[] } = {
-      placeID,
-      city,
-      upvoteCount: 0,
-      followers: [ctx.userID]
-    };
-
-    const params: PutItemInput = {
-      TableName: "Places",
-      Item: (newPlace as unknown) as PutItemInputAttributeMap
-    };
-
-    db.createItem(params);
-
-    return newPlace;
-  }
-
   @Mutation(() => Boolean)
   public upvotePlace(
     @Ctx() ctx: Context,
     @Arg("placeID") placeID: string,
     @Arg("city") city: string
   ) {
-    return (
-      db
-        .modifyAttributes(
+    return db
+      .modifyAttributes(
+        "Users",
+        { userID: ctx.userID },
+        { favourites: [placeID] }
+      )
+      .then(() => {
+        db.deleteFromSetAttribute(
           "Users",
           { userID: ctx.userID },
-          { favourites: [placeID] }
+          "dislikes",
+          placeID
+        );
+      })
+      .then(() =>
+        db.modifyAttributes(
+          "Places",
+          { placeID },
+          {
+            upvoteCount: 1,
+            followers: [ctx.userID]
+          },
+          {
+            city: city as AttributeValue
+          }
         )
-        .then(() =>
-          db.modifyAttributes(
-            "Places",
-            { placeID },
-            {
-              upvoteCount: 1,
-              followers: [ctx.userID]
-            },
-            {
-              city: city as AttributeValue
-            }
-          )
-        )
-        // .then(() =>
-        //   db.appendToAttributes(
-        //     "Places",
-        //     { placeID },
-        //     { followers: [ctx.userID] }
-        //   )
-        // )
-        .then(() => true)
-        .catch(err => {
-          console.log(err);
-          return err;
-        })
-    );
+      )
+      .then(() => true)
+      .catch(err => {
+        console.log(err);
+        return err;
+      });
   }
 
   @Mutation(() => Boolean)
@@ -87,12 +63,19 @@ export class PlaceResolver {
     @Arg("city") city: string
   ) {
     return db
-      .deleteFromSetAttribute(
+      .modifyAttributes(
         "Users",
         { userID: ctx.userID },
-        "favourites",
-        placeID
+        { dislikes: [placeID] }
       )
+      .then(() => {
+        db.deleteFromSetAttribute(
+          "Users",
+          { userID: ctx.userID },
+          "favourites",
+          placeID
+        );
+      })
       .then(() =>
         db.modifyAttributes(
           "Places",
@@ -104,7 +87,12 @@ export class PlaceResolver {
         )
       )
       .then(() =>
-        db.deleteFromSetAttribute("Places", { placeID }, "followers", ctx.userID)
+        db.deleteFromSetAttribute(
+          "Places",
+          { placeID },
+          "followers",
+          ctx.userID
+        )
       )
       .then(() => true)
       .catch(err => {

@@ -18,7 +18,7 @@ import {
   UpdateItemOutput
 } from "aws-sdk/clients/dynamodb";
 import _ from "lodash";
-import { promisify } from "../../utils/helpers";
+import { promisify } from "../../utils/helpers/transform";
 
 let docClient = require("serverless-dynamodb-client").doc;
 

@@ -1,12 +1,4 @@
-import {
-  Arg,
-  Ctx,
-  FieldResolver,
-  Mutation,
-  Query,
-  Resolver,
-  Root
-} from "type-graphql";
+import { Arg, Ctx, FieldResolver, Query, Resolver, Root } from "type-graphql";
 import * as db from "../../service/dynamo";
 import { Context } from "../context";
 import { Place } from "../types/place.type";
@@ -25,19 +17,14 @@ export class UserResolver {
     const userInfo = await db.getByKey("Users", { userID: ctx.userID });
     return userInfo.Item;
   }
+  @Query(() => [Place], { nullable: true })
+  public getUserFavourites(@Arg("userID") userID: string) {
+    return this.getUserPlaceProp(userID, "favourites");
+  }
 
   @Query(() => [Place], { nullable: true })
-  public async getUserFavourites(@Arg("userID") userID: string) {
-    const result = await db.getByKey("Users", { userID }, "favourites");
-    // if (result.Item) {
-    //   console.log((result.Item.favourites as Set<string>).values);
-    // }
-    return result.Item && result.Item.favourites
-      ? (result.Item.favourites as any).values.map(async (placeID: string) => {
-          const placeContainer = await db.getByKey("Places", { placeID });
-          return placeContainer.Item;
-        })
-      : [];
+  public getUserDislikes(@Arg("userID") userID: string) {
+    return this.getUserPlaceProp(userID, "dislikes");
   }
 
   @FieldResolver(() => [Place], { nullable: true })
@@ -45,15 +32,18 @@ export class UserResolver {
     return this.getUserFavourites(user.userID);
   }
 
-  @Mutation(() => Boolean)
-  public addFavourite(@Ctx() ctx: Context, @Arg("placeID") placeID: string) {
-    return db
-      .appendToAttributes(
-        "Users",
-        { userID: ctx.userID },
-        { favourites: [placeID] }
-      )
-      .then(() => true)
-      .catch(() => false);
+  @FieldResolver(() => [Place], { nullable: true })
+  public dislikes(@Root() user: User) {
+    return this.getUserDislikes(user.userID);
+  }
+
+  private async getUserPlaceProp(userID: string, prop: string) {
+    const result = await db.getByKey("Users", { userID }, prop);
+    return result.Item && result.Item[prop]
+      ? (result.Item[prop] as any).values.map(async (placeID: string) => {
+          const placeContainer = await db.getByKey("Places", { placeID });
+          return placeContainer.Item;
+        })
+      : [];
   }
 }
