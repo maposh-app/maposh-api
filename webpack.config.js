@@ -1,4 +1,5 @@
 const path = require("path");
+const UglifyJSPlugin = require("uglifyjs-webpack-plugin");
 // eslint-disable-next-line import/no-extraneous-dependencies
 const nodeExternals = require("webpack-node-externals");
 // eslint-disable-next-line import/no-extraneous-dependencies
@@ -36,5 +37,19 @@ module.exports = {
     libraryTarget: "commonjs",
     path: path.join(__dirname, ".build"),
     filename: "[name].js"
+  },
+  optimization: {
+    minimizer: [
+      new UglifyJSPlugin({
+        uglifyOptions: {
+          mangle: {
+            keep_fnames: true //Does not optimize function names
+          },
+          compress: {
+            keep_fnames: true //Same as mangle. Both are necessary
+          }
+        }
+      })
+    ]
   }
 };

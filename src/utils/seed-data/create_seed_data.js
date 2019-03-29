@@ -33,7 +33,7 @@ for (let i = 0; i < handlePlaceNames.length; i += 1) {
     placeID: placeId,
     city: faker.address.city(),
     upvoteCount: i,
-    addedBy: offlineUserInfo.userID
+    followers: [offlineUserInfo.userID]
   };
   pdata.push(placeInfo);
 
