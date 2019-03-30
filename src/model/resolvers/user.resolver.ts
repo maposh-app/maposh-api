@@ -6,13 +6,13 @@ import { User } from "../types/user.type";
 
 @Resolver(() => User)
 export class UserResolver {
-  @Query(() => User)
+  @Query(() => User, { nullable: true })
   public async getUserInfo(@Arg("userID") userID: string) {
     const userInfo = await db.getByKey("Users", { userID });
     return userInfo.Item;
   }
 
-  @Query(() => User)
+  @Query(() => User, { nullable: true })
   public async meInfo(@Ctx() ctx: Context) {
     const userInfo = await db.getByKey("Users", { userID: ctx.userID });
     return userInfo.Item;
