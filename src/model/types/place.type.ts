@@ -8,7 +8,7 @@ export class Place {
   @Field()
   public city: string;
 
-  @Field(() => Int)
+  @Field(() => Int, { nullable: true })
   public upvoteCount: number;
 }
 
