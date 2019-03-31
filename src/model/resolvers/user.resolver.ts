@@ -1,4 +1,13 @@
-import { Arg, Ctx, FieldResolver, Query, Resolver, Root } from "type-graphql";
+import { AttributeValue } from "aws-sdk/clients/dynamodb";
+import {
+  Arg,
+  Ctx,
+  FieldResolver,
+  Mutation,
+  Query,
+  Resolver,
+  Root
+} from "type-graphql";
 import * as db from "../../service/dynamo";
 import { Context } from "../context";
 import { Place } from "../types/place.type";
@@ -35,6 +44,108 @@ export class UserResolver {
   @FieldResolver(() => [Place], { nullable: true })
   public dislikes(@Root() user: User) {
     return this.getUserDislikes(user.userID);
+  }
+
+  @Mutation(() => Boolean)
+  public forget(@Ctx() ctx: Context, @Arg("placeID") placeID: string) {
+    return db
+      .deleteFromSetAttribute(
+        "Users",
+        { userID: ctx.userID },
+        "dislikes",
+        placeID
+      )
+      .then(() =>
+        db.deleteFromSetAttribute(
+          "Users",
+          { userID: ctx.userID },
+          "favourites",
+          placeID
+        )
+      )
+      .then(() =>
+        db.deleteFromSetAttribute(
+          "Places",
+          { placeID },
+          "followers",
+          ctx.userID
+        )
+      )
+      .then(() => true)
+      .catch(err => {
+        console.log(err);
+        return err;
+      });
+  }
+
+  @Mutation(() => Boolean)
+  public like(
+    @Ctx() ctx: Context,
+    @Arg("placeID") placeID: string,
+    @Arg("city") city: string
+  ) {
+    return db
+      .modifyAttributes(
+        "Users",
+        { userID: ctx.userID },
+        { favourites: [placeID] }
+      )
+      .then(() => {
+        db.deleteFromSetAttribute(
+          "Users",
+          { userID: ctx.userID },
+          "dislikes",
+          placeID
+        );
+      })
+      .then(() =>
+        db.modifyAttributes(
+          "Places",
+          { placeID },
+          {
+            followers: [ctx.userID]
+          },
+          {
+            city: city as AttributeValue
+          }
+        )
+      )
+      .then(() => true)
+      .catch(err => {
+        console.log(err);
+        return err;
+      });
+  }
+
+  @Mutation(() => Boolean)
+  public dislike(@Ctx() ctx: Context, @Arg("placeID") placeID: string) {
+    return db
+      .modifyAttributes(
+        "Users",
+        { userID: ctx.userID },
+        { dislikes: [placeID] }
+      )
+      .then(() => {
+        db.deleteFromSetAttribute(
+          "Users",
+          { userID: ctx.userID },
+          "favourites",
+          placeID
+        );
+      })
+      .then(() =>
+        db.deleteFromSetAttribute(
+          "Places",
+          { placeID },
+          "followers",
+          ctx.userID
+        )
+      )
+      .then(() => true)
+      .catch(err => {
+        console.log(err);
+        return err;
+      });
   }
 
   private async getUserPlaceProp(userID: string, prop: string) {

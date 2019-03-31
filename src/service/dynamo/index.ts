@@ -190,7 +190,6 @@ export function modifyAttributes(
     ExpressionAttributeValues = _.transform(
       increments,
       (result, value, attribute) => {
-        console.log(docClient.createSet(value));
         result[`:${attribute}`] = Array.isArray(value)
           ? docClient.createSet(value)
           : (value as AttributeValue);
