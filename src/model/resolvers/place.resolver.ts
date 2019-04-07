@@ -11,6 +11,12 @@ export class PlaceResolver {
     return placeInfo.Item;
   }
 
+  @Query(() => [Place], { nullable: true })
+  public async getPlaces(@Arg("city") city: string) {
+    const placeInfo = await db.queryIndex("Places", "TopCityPlaces", { city });
+    return placeInfo.Items;
+  }
+
   @Mutation(() => Boolean)
   public ratePlace(
     @Arg("placeID") placeID: string,

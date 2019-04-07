@@ -17,7 +17,7 @@ import {
   UpdateItemInput,
   UpdateItemOutput
 } from "aws-sdk/clients/dynamodb";
-import _ from "lodash";
+import _, { Dictionary } from "lodash";
 import { promisify } from "../../utils/helpers/transform";
 
 let docClient = require("serverless-dynamodb-client").doc;
@@ -45,6 +45,38 @@ export const get = (params: GetItemInput) => {
     docClient.get(params, callback)
   );
 };
+
+export function queryIndex(
+  tableName: string,
+  indexName: string,
+  key: { [prop: string]: string | number }
+) {
+  const KeyConditionExpression = `${Object.keys(key)
+    .map(attribute => `#${attribute} = :${attribute}`)
+    .join(" ")}`;
+  const ExpressionAttributeNames = _.transform(
+    key,
+    (result: Dictionary<string>, _value, attribute) => {
+      result[`#${attribute}`] = attribute as string;
+    }
+  );
+
+  const ExpressionAttributeValues = _.transform(
+    key,
+    (result, value, attribute) => {
+      result[`:${attribute}`] = value;
+    }
+  );
+
+  const params: QueryInput = {
+    TableName: tableName,
+    IndexName: indexName,
+    KeyConditionExpression,
+    ExpressionAttributeNames,
+    ExpressionAttributeValues
+  };
+  return query(params);
+}
 
 export function getByKey(
   tableName: string,
