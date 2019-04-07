@@ -15,7 +15,7 @@ export class PlaceResolver {
   @Query(() => [Place], { nullable: true })
   public async getPlaces(@Arg("city") city: string) {
     const placeInfo = await db.queryIndex("Places", "top-city-places", {
-      city: _.snakeCase(city)
+      city: _.camelCase(city)
     });
     return placeInfo.Items;
   }
@@ -34,7 +34,7 @@ export class PlaceResolver {
           upvoteCount: score
         },
         {
-          city: _.snakeCase(city) as AttributeValue
+          city: _.camelCase(city) as AttributeValue
         }
       )
       .then(() => true)
