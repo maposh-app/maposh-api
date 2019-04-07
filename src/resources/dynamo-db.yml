@@ -33,7 +33,7 @@ Resources:
         WriteCapacityUnits: 1
       TableName: "Places"
       GlobalSecondaryIndexes:
-        - IndexName: TopCityPlaces
+        - IndexName: top-city-places
           KeySchema:
             - AttributeName: city
               KeyType: HASH

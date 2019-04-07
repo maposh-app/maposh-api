@@ -20,6 +20,17 @@ provider:
         - dynamodb:DeleteItem
       Resource:
         - "Fn::GetAtt": [PlacesTable, Arn]
+        - {
+            "Fn::Join":
+              [
+                "/",
+                [
+                  { "Fn::GetAtt": ["PlacesTable", "Arn"] },
+                  "index",
+                  "top-city-places",
+                ],
+              ],
+          }
         - "Fn::GetAtt": [UserTable, Arn]
 
 custom:
