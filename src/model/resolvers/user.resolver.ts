@@ -1,4 +1,5 @@
 import { AttributeValue } from "aws-sdk/clients/dynamodb";
+import _ from "lodash";
 import {
   Arg,
   Ctx,
@@ -82,6 +83,7 @@ export class UserResolver {
   public like(
     @Ctx() ctx: Context,
     @Arg("placeID") placeID: string,
+    @Arg("name") name: string,
     @Arg("city") city: string
   ) {
     return db
@@ -106,7 +108,8 @@ export class UserResolver {
             followers: [ctx.userID]
           },
           {
-            city: city as AttributeValue
+            name: _.camelCase(name) as AttributeValue,
+            city: _.camelCase(city) as AttributeValue
           }
         )
       )

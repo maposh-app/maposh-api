@@ -23,6 +23,7 @@ export class PlaceResolver {
   @Mutation(() => Boolean)
   public ratePlace(
     @Arg("placeID") placeID: string,
+    @Arg("name") name: string,
     @Arg("city") city: string,
     @Arg("score") score: number
   ) {
@@ -34,6 +35,7 @@ export class PlaceResolver {
           upvoteCount: score
         },
         {
+          name: _.camelCase(name) as AttributeValue,
           city: _.camelCase(city) as AttributeValue
         }
       )
