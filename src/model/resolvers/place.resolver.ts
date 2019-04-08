@@ -2,6 +2,7 @@ import { AttributeValue } from "aws-sdk/clients/dynamodb";
 import { Arg, Mutation, Query, Resolver } from "type-graphql";
 import * as db from "../../service/dynamo";
 import { Place } from "../types/place.type";
+import _ from "lodash";
 
 @Resolver(() => Place)
 export class PlaceResolver {
@@ -11,9 +12,18 @@ export class PlaceResolver {
     return placeInfo.Item;
   }
 
+  @Query(() => [Place], { nullable: true })
+  public async getPlaces(@Arg("city") city: string) {
+    const placeInfo = await db.queryIndex("Places", "top-city-places", {
+      city: _.camelCase(city)
+    });
+    return placeInfo.Items;
+  }
+
   @Mutation(() => Boolean)
   public ratePlace(
     @Arg("placeID") placeID: string,
+    @Arg("name") name: string,
     @Arg("city") city: string,
     @Arg("score") score: number
   ) {
@@ -25,7 +35,8 @@ export class PlaceResolver {
           upvoteCount: score
         },
         {
-          city: city as AttributeValue
+          name: _.camelCase(name) as AttributeValue,
+          city: _.camelCase(city) as AttributeValue
         }
       )
       .then(() => true)

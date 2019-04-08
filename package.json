@@ -14,7 +14,7 @@
     "dynamodb-insert-seed-data-staging": "cd ./src/utils/seed-data && node insert_seed_data_staging.js",
     "prestart": "./src/utils/scripts/pre.sh",
     "start": "yarn dynamodb-generate-seed-data && serverless dynamodb install --localPath ./bin && env-cmd .env serverless offline start",
-    "deploy-staging": "yarn dynamodb-generate-seed-data && env-cmd .env serverless --stage=staging deploy && yarn dynamodb-insert-seed-data-staging"
+    "deploy-staging": "env-cmd .env serverless --stage=staging deploy"
   },
   "dependencies": {
     "@babel/polyfill": "^7.2.5",

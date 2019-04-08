@@ -6,6 +6,9 @@ export class Place {
   public placeID: string;
 
   @Field()
+  public name: string;
+
+  @Field()
   public city: string;
 
   @Field(() => Int, { nullable: true })
@@ -19,6 +22,9 @@ export class RankedPlaceToken {
 
   @Field(() => Int)
   public upvoteCount: number;
+
+  @Field()
+  public name: string;
 
   @Field()
   public city: string;
