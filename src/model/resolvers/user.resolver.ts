@@ -51,8 +51,8 @@ export class UserResolver {
   public forget(@Ctx() ctx: Context, @Arg("placeID") placeID: string) {
     return db
       .modifyAttributes("Users", { userID: ctx.userID }, undefined, undefined, {
-        likes: placeID,
-        dislikes: placeID
+        likes: [placeID],
+        dislikes: [placeID]
       })
       .then(() =>
         db.modifyAttributes("Places", { placeID }, undefined, undefined, {
@@ -80,7 +80,7 @@ export class UserResolver {
         { userID: ctx.userID },
         { likes: [placeID] },
         undefined,
-        { dislikes: placeID }
+        { dislikes: [placeID] }
       )
       .then(() =>
         db.modifyAttributes(
@@ -118,7 +118,7 @@ export class UserResolver {
         { userID: ctx.userID },
         { dislikes: [placeID] },
         undefined,
-        { likes: placeID }
+        { likes: [placeID] }
       )
       .then(() =>
         db.modifyAttributes(
