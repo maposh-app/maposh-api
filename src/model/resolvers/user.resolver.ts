@@ -82,7 +82,8 @@ export class UserResolver {
     @Ctx() ctx: Context,
     @Arg("placeID") placeID: string,
     @Arg("name") name: string,
-    @Arg("city") city: string
+    @Arg("city") city: string,
+    @Arg("extra") extra?: number
   ) {
     return db
       .modifyAttributes(
@@ -98,7 +99,7 @@ export class UserResolver {
           { placeID },
           {
             likers: [ctx.userID],
-            upvoteCount: 1
+            upvoteCount: extra ? extra + 1 : 1
           },
           {
             name: name as AttributeValue,
@@ -121,7 +122,8 @@ export class UserResolver {
     @Ctx() ctx: Context,
     @Arg("placeID") placeID: string,
     @Arg("name") name: string,
-    @Arg("city") city: string
+    @Arg("city") city: string,
+    @Arg("extra") extra?: number
   ) {
     return db
       .modifyAttributes(
@@ -137,7 +139,7 @@ export class UserResolver {
           { placeID },
           {
             dislikers: [ctx.userID],
-            upvoteCount: -1
+            upvoteCount: extra ? extra - 1 : -1
           },
           {
             name: name as AttributeValue,
