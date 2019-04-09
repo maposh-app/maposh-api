@@ -48,17 +48,27 @@ export class UserResolver {
   }
 
   @Mutation(() => Boolean)
-  public forget(@Ctx() ctx: Context, @Arg("placeID") placeID: string) {
+  public forget(
+    @Ctx() ctx: Context,
+    @Arg("placeID") placeID: string,
+    @Arg("score") score: number
+  ) {
     return db
       .modifyAttributes("Users", { userID: ctx.userID }, undefined, undefined, {
         likes: [placeID],
         dislikes: [placeID]
       })
       .then(() =>
-        db.modifyAttributes("Places", { placeID }, undefined, undefined, {
-          likers: [ctx.userID],
-          dislikers: [ctx.userID]
-        })
+        db.modifyAttributes(
+          "Places",
+          { placeID },
+          { upvoteCount: score },
+          undefined,
+          {
+            likers: [ctx.userID],
+            dislikers: [ctx.userID]
+          }
+        )
       )
       .then(() => true)
       .catch(err => {
@@ -87,7 +97,8 @@ export class UserResolver {
           "Places",
           { placeID },
           {
-            likers: [ctx.userID]
+            likers: [ctx.userID],
+            upvoteCount: 1
           },
           {
             name: name as AttributeValue,
@@ -125,7 +136,8 @@ export class UserResolver {
           "Places",
           { placeID },
           {
-            dislikers: [ctx.userID]
+            dislikers: [ctx.userID],
+            upvoteCount: -1
           },
           {
             name: name as AttributeValue,

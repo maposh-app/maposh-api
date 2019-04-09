@@ -17,7 +17,7 @@ import {
   UpdateItemOutput
 } from "aws-sdk/clients/dynamodb";
 import _, { Dictionary } from "lodash";
-import { promisify, union, difference } from "../../utils/helpers/transform";
+import { promisify } from "../../utils/helpers/transform";
 
 let docClient = require("serverless-dynamodb-client").doc;
 
@@ -212,44 +212,6 @@ export function modifyAttributes(
   let ExpressionAttributeValues: ExpressionAttributeValueMap = {};
 
   let addExpressions: string[] = [];
-  if (tableName === "Places") {
-    let upvoteCount = 0;
-    let positives = new Set<string>();
-    let negatives = new Set<string>();
-
-    if (increments) {
-      if (increments.dislikers) {
-        const uniqueDislikers = new Set(increments.dislikers as [string]);
-        negatives = union<string>(negatives, uniqueDislikers);
-      }
-      if (increments.likers) {
-        const uniqueLikers = new Set(increments.likers as [string]);
-        positives = union<string>(positives, uniqueLikers);
-      }
-    }
-
-    if (pops) {
-      if (pops.dislikers) {
-        const uniqueDislikers = new Set(pops.dislikers as [string]);
-        positives = union<string>(positives, uniqueDislikers);
-      }
-      if (pops.likers) {
-        const uniqueLikers = new Set(pops.likers as [string]);
-        negatives = union<string>(negatives, uniqueLikers);
-      }
-    }
-
-    upvoteCount = difference(positives, negatives).size;
-
-    if (upvoteCount) {
-      addExpressions.push("#upvoteCount :upvoteCount");
-
-      // INVARIANT: The upvoteCount is a derived attribute.
-      ExpressionAttributeNames["#upvoteCount"] = "upvoteCount";
-
-      ExpressionAttributeValues[":upvoteCount"] = upvoteCount as AttributeValue;
-    }
-  }
 
   if (increments) {
     addExpressions = addExpressions.concat(
