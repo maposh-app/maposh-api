@@ -10,3 +10,18 @@ export function promisify<T>(method: Function) {
     });
   });
 }
+
+export function union<T>(...iterables: Array<Set<T>>): Set<T> {
+  const set = new Set<T>();
+  iterables.forEach(iterable => {
+    iterable.forEach(item => set.add(item));
+  });
+  return set;
+}
+
+export function difference<T>(minuend: Set<T>, subtrahend: Set<T>) {
+  const set = new Set<T>(
+    Array.from(minuend).filter(item => !subtrahend.has(item))
+  );
+  return set;
+}
