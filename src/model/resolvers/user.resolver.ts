@@ -50,17 +50,15 @@ export class UserResolver {
   @Mutation(() => Boolean)
   public forget(@Ctx() ctx: Context, @Arg("placeID") placeID: string) {
     return db
-      .deleteFromSetAttributes(
-        "Users",
-        { userID: ctx.userID },
-        { likes: placeID, dislikes: placeID }
-      )
+      .modifyAttributes("Users", { userID: ctx.userID }, undefined, undefined, {
+        likes: placeID,
+        dislikes: placeID
+      })
       .then(() =>
-        db.deleteFromSetAttributes(
-          "Places",
-          { placeID },
-          { likers: [ctx.userID], dislikers: [ctx.userID] }
-        )
+        db.modifyAttributes("Places", { placeID }, undefined, undefined, {
+          likers: [ctx.userID],
+          dislikers: [ctx.userID]
+        })
       )
       .then(() => true)
       .catch(err => {

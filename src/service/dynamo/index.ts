@@ -211,43 +211,43 @@ export function modifyAttributes(
   let ExpressionAttributeNames: ExpressionAttributeNameMap = {};
   let ExpressionAttributeValues: ExpressionAttributeValueMap = {};
 
-  if (increments) {
-    let addExpressions: string[] = [];
-    if (tableName === "Places") {
-      let upvoteCount = 0;
+  let addExpressions: string[] = [];
+  if (tableName === "Places") {
+    let upvoteCount = 0;
 
-      if (increments) {
-        if (increments.dislikers) {
-          const uniqueDislikers = new Set(increments.dislikers as [
-            string | number
-          ]);
-          upvoteCount -= uniqueDislikers.size;
-        }
-        if (increments.likers) {
-          const uniqueLikers = new Set(increments.likers as [string | number]);
-          upvoteCount += uniqueLikers.size;
-        }
+    if (increments) {
+      if (increments.dislikers) {
+        const uniqueDislikers = new Set(increments.dislikers as [
+          string | number
+        ]);
+        upvoteCount -= uniqueDislikers.size;
       }
-
-      if (pops) {
-        if (pops.dislikers) {
-          const uniqueDislikers = new Set(pops.dislikers as [string | number]);
-          upvoteCount += uniqueDislikers.size;
-        }
-        if (pops.likers) {
-          const uniqueLikers = new Set(pops.likers as [string | number]);
-          upvoteCount -= uniqueLikers.size;
-        }
+      if (increments.likers) {
+        const uniqueLikers = new Set(increments.likers as [string | number]);
+        upvoteCount += uniqueLikers.size;
       }
-
-      addExpressions.push("#upvoteCount :upvoteCount");
-
-      // INVARIANT: The upvoteCount is a derived attribute.
-      ExpressionAttributeNames["#upvoteCount"] = "upvoteCount";
-
-      ExpressionAttributeValues[":upvoteCount"] = upvoteCount as AttributeValue;
     }
 
+    if (pops) {
+      if (pops.dislikers) {
+        const uniqueDislikers = new Set(pops.dislikers as [string | number]);
+        upvoteCount += uniqueDislikers.size;
+      }
+      if (pops.likers) {
+        const uniqueLikers = new Set(pops.likers as [string | number]);
+        upvoteCount -= uniqueLikers.size;
+      }
+    }
+
+    addExpressions.push("#upvoteCount :upvoteCount");
+
+    // INVARIANT: The upvoteCount is a derived attribute.
+    ExpressionAttributeNames["#upvoteCount"] = "upvoteCount";
+
+    ExpressionAttributeValues[":upvoteCount"] = upvoteCount as AttributeValue;
+  }
+
+  if (increments) {
     addExpressions = addExpressions.concat(
       Object.keys(increments).map(attribute => `#${attribute} :${attribute}`)
     );
