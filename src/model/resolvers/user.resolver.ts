@@ -28,8 +28,8 @@ export class UserResolver {
     return userInfo.Item;
   }
   @Query(() => [Place], { nullable: true })
-  public getUserFavourites(@Arg("userID") userID: string) {
-    return this.getUserPlaceProp(userID, "favourites");
+  public getUserLikes(@Arg("userID") userID: string) {
+    return this.getUserPlaceProp(userID, "likes");
   }
 
   @Query(() => [Place], { nullable: true })
@@ -38,8 +38,8 @@ export class UserResolver {
   }
 
   @FieldResolver(() => [Place], { nullable: true })
-  public favourites(@Root() user: User) {
-    return this.getUserFavourites(user.userID);
+  public likes(@Root() user: User) {
+    return this.getUserLikes(user.userID);
   }
 
   @FieldResolver(() => [Place], { nullable: true })
@@ -50,26 +50,16 @@ export class UserResolver {
   @Mutation(() => Boolean)
   public forget(@Ctx() ctx: Context, @Arg("placeID") placeID: string) {
     return db
-      .deleteFromSetAttribute(
+      .deleteFromSetAttributes(
         "Users",
         { userID: ctx.userID },
-        "dislikes",
-        placeID
+        { likes: placeID, dislikes: placeID }
       )
       .then(() =>
-        db.deleteFromSetAttribute(
-          "Users",
-          { userID: ctx.userID },
-          "favourites",
-          placeID
-        )
-      )
-      .then(() =>
-        db.deleteFromSetAttribute(
+        db.deleteFromSetAttributes(
           "Places",
           { placeID },
-          "followers",
-          ctx.userID
+          { likers: [ctx.userID], dislikers: [ctx.userID] }
         )
       )
       .then(() => true)
@@ -90,26 +80,23 @@ export class UserResolver {
       .modifyAttributes(
         "Users",
         { userID: ctx.userID },
-        { favourites: [placeID] }
+        { likes: [placeID] },
+        undefined,
+        { dislikes: placeID }
       )
-      .then(() => {
-        db.deleteFromSetAttribute(
-          "Users",
-          { userID: ctx.userID },
-          "dislikes",
-          placeID
-        );
-      })
       .then(() =>
         db.modifyAttributes(
           "Places",
           { placeID },
           {
-            followers: [ctx.userID]
+            likers: [ctx.userID]
           },
           {
-            name: _.camelCase(name) as AttributeValue,
+            name: name as AttributeValue,
             city: _.camelCase(city) as AttributeValue
+          },
+          {
+            dislikers: [ctx.userID]
           }
         )
       )
@@ -121,27 +108,34 @@ export class UserResolver {
   }
 
   @Mutation(() => Boolean)
-  public dislike(@Ctx() ctx: Context, @Arg("placeID") placeID: string) {
+  public dislike(
+    @Ctx() ctx: Context,
+    @Arg("placeID") placeID: string,
+    @Arg("name") name: string,
+    @Arg("city") city: string
+  ) {
     return db
       .modifyAttributes(
         "Users",
         { userID: ctx.userID },
-        { dislikes: [placeID] }
+        { dislikes: [placeID] },
+        undefined,
+        { likes: placeID }
       )
-      .then(() => {
-        db.deleteFromSetAttribute(
-          "Users",
-          { userID: ctx.userID },
-          "favourites",
-          placeID
-        );
-      })
       .then(() =>
-        db.deleteFromSetAttribute(
+        db.modifyAttributes(
           "Places",
           { placeID },
-          "followers",
-          ctx.userID
+          {
+            dislikers: [ctx.userID]
+          },
+          {
+            name: name as AttributeValue,
+            city: _.camelCase(city) as AttributeValue
+          },
+          {
+            likers: [ctx.userID]
+          }
         )
       )
       .then(() => true)

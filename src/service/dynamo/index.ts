@@ -1,5 +1,4 @@
 import {
-  AttributeName,
   AttributeValue,
   ConditionExpression,
   DeleteItemInput,
@@ -168,20 +167,27 @@ export function appendToAttributes(
   });
 }
 
-export function deleteFromSetAttribute(
+export function deleteFromSetAttributes(
   tableName: string,
   key: { [prop: string]: string | number },
-  attribute: AttributeName,
-  value: string | number | Array<string | number>
+  attributes: { [attribute: string]: string | number | Array<string | number> }
 ) {
-  const UpdateExpression = `DELETE #${attribute} :${attribute}`;
-  const ExpressionAttributeNames: ExpressionAttributeNameMap = {};
-  ExpressionAttributeNames[`#${attribute}`] = attribute;
-  const ExpressionAttributeValues: ExpressionAttributeValueMap = {};
-  ExpressionAttributeValues[`:${attribute}`] = docClient.createSet(
-    value
-  ) as AttributeValue;
+  const UpdateExpression = `DELETE ${Object.keys(attributes)
+    .map(attribute => `#${attribute} :${attribute}`)
+    .join()}`;
 
+  const ExpressionAttributeNames: ExpressionAttributeNameMap = _.transform(
+    attributes,
+    (result, _value, attribute) => {
+      result[`#${attribute}`] = attribute;
+    }
+  );
+  const ExpressionAttributeValues: ExpressionAttributeValueMap = _.transform(
+    attributes,
+    (result, value, attribute) => {
+      result[`:${attribute}`] = docClient.createSet(value) as AttributeValue;
+    }
+  );
   const params: UpdateItemInput = {
     TableName: tableName,
     Key: key as { [prop: string]: AttributeValue },
@@ -198,40 +204,71 @@ export function modifyAttributes(
   tableName: string,
   key: { [prop: string]: string | number },
   increments?: { [attribute: string]: number | Array<string | number> },
-  properties?: { [attribute: string]: AttributeValue }
+  properties?: { [attribute: string]: AttributeValue },
+  pops?: { [attribute: string]: string | number | Array<string | number> }
 ) {
   const UpdateExpression: string[] = [];
-  // const Conditions: ConditionExpression[] = [];
   let ExpressionAttributeNames: ExpressionAttributeNameMap = {};
   let ExpressionAttributeValues: ExpressionAttributeValueMap = {};
 
   if (increments) {
-    UpdateExpression.push(
-      `ADD ${Object.keys(increments)
-        .map(attribute => `#${attribute} :${attribute}`)
-        .join()}`
-    );
+    let addExpressions: string[] = [];
+    if (tableName === "Places") {
+      let upvoteCount = 0;
 
-    ExpressionAttributeNames = _.transform(
-      increments,
-      (result, _value, attribute) => {
-        result[`#${attribute}`] = attribute;
+      if (increments) {
+        if (increments.dislikers) {
+          const uniqueDislikers = new Set(increments.dislikers as [
+            string | number
+          ]);
+          upvoteCount -= uniqueDislikers.size;
+        }
+        if (increments.likers) {
+          const uniqueLikers = new Set(increments.likers as [string | number]);
+          upvoteCount += uniqueLikers.size;
+        }
       }
+
+      if (pops) {
+        if (pops.dislikers) {
+          const uniqueDislikers = new Set(pops.dislikers as [string | number]);
+          upvoteCount += uniqueDislikers.size;
+        }
+        if (pops.likers) {
+          const uniqueLikers = new Set(pops.likers as [string | number]);
+          upvoteCount -= uniqueLikers.size;
+        }
+      }
+
+      addExpressions.push("#upvoteCount :upvoteCount");
+
+      // INVARIANT: The upvoteCount is a derived attribute.
+      ExpressionAttributeNames["#upvoteCount"] = "upvoteCount";
+
+      ExpressionAttributeValues[":upvoteCount"] = upvoteCount as AttributeValue;
+    }
+
+    addExpressions = addExpressions.concat(
+      Object.keys(increments).map(attribute => `#${attribute} :${attribute}`)
     );
 
-    ExpressionAttributeValues = _.transform(
-      increments,
-      (result, value, attribute) => {
+    UpdateExpression.push(`ADD ${addExpressions.join()}`);
+
+    ExpressionAttributeNames = {
+      ...ExpressionAttributeNames,
+      ..._.transform(increments, (result, _value, attribute) => {
+        result[`#${attribute}`] = attribute;
+      })
+    };
+
+    ExpressionAttributeValues = {
+      ...ExpressionAttributeValues,
+      ..._.transform(increments, (result, value, attribute) => {
         result[`:${attribute}`] = Array.isArray(value)
           ? docClient.createSet(value)
           : (value as AttributeValue);
-      }
-    );
-    // Conditions.push(
-    //   Object.keys(increments)
-    //     .map(attribute => `attribute_exists(${attribute})`)
-    //     .join()
-    // );
+      })
+    };
   }
 
   if (properties) {
@@ -254,18 +291,33 @@ export function modifyAttributes(
         result[`:${attribute}`] = value;
       })
     };
-    // Conditions.push(
-    //   Object.keys(properties)
-    //     .map(attribute => `attribute_exists(${attribute})`)
-    //     .join()
-    // );
+  }
+
+  if (pops) {
+    UpdateExpression.push(
+      `DELETE ${Object.keys(pops)
+        .map(attribute => `#${attribute} :${attribute}`)
+        .join()}`
+    );
+
+    ExpressionAttributeNames = {
+      ...ExpressionAttributeNames,
+      ..._.transform(pops, (result, _value, attribute) => {
+        result[`#${attribute}`] = attribute;
+      })
+    };
+    ExpressionAttributeValues = {
+      ...ExpressionAttributeValues,
+      ..._.transform(pops, (result, value, attribute) => {
+        result[`:${attribute}`] = docClient.createSet(value) as AttributeValue;
+      })
+    };
   }
 
   const params: UpdateItemInput = {
     TableName: tableName,
     Key: key as { [prop: string]: AttributeValue },
     UpdateExpression: UpdateExpression.join(" "),
-    // ConditionExpression: Conditions.join(),
     ExpressionAttributeValues,
     ExpressionAttributeNames,
     ReturnValues: "UPDATED_NEW"

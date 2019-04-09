@@ -14,17 +14,22 @@ const playgroundConfig = (() => {
       firstName
       lastName
     }
-    getPlaceInfo(placeID:"b8c4087f-b979-47ce-a1b4-9db67704a9ab") {
+    getPlaceInfo(placeID:"0") {
+      upvoteCount
       city
     }
   }
   # mutation {
-  #   addPlace(
+  #   like(
   #     placeID: "0"
-  #     city: "Nice"
-  #   ) {
-  #     upvoteCount
-  #   }
+  #     city: "Nice",
+  #     name: "The Nicest Cafe in the World"
+  #   )
+  #   dislike(
+  #     placeID: "1"
+  #     city: "Moscow",
+  #     name: "Not The Nicest Cafe in the World"
+  #   )
   # }
   `;
 
