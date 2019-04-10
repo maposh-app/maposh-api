@@ -1,4 +1,4 @@
-import { Field, ID, InputType, Int } from "type-graphql";
+import { Field, ID, InputType, Int, Float } from "type-graphql";
 import { RankedPlaceToken } from "./place.type";
 
 @InputType()
@@ -12,6 +12,12 @@ export class RankedPlaceTokenInput implements Partial<RankedPlaceToken> {
   @Field()
   public city: string;
 
-  @Field(() => Int)
+  @Field(() => Int, { nullable: true })
   public upvoteCount: number;
+
+  @Field(() => Float, { nullable: true })
+  public longitude: number;
+
+  @Field(() => Float, { nullable: true })
+  public latitude: number;
 }

@@ -83,6 +83,8 @@ export class UserResolver {
     @Arg("placeID") placeID: string,
     @Arg("name") name: string,
     @Arg("city") city: string,
+    @Arg("longitude") longitude?: number,
+    @Arg("latitude") latitude?: number,
     @Arg("extra") extra?: number
   ) {
     return db
@@ -103,7 +105,9 @@ export class UserResolver {
           },
           {
             name: name as AttributeValue,
-            city: _.camelCase(city) as AttributeValue
+            city: _.camelCase(city) as AttributeValue,
+            longitude: longitude as AttributeValue,
+            latitude: latitude as AttributeValue
           },
           {
             dislikers: [ctx.userID]
@@ -123,6 +127,8 @@ export class UserResolver {
     @Arg("placeID") placeID: string,
     @Arg("name") name: string,
     @Arg("city") city: string,
+    @Arg("longitude") longitude?: number,
+    @Arg("latitude") latitude?: number,
     @Arg("extra") extra?: number
   ) {
     return db
@@ -143,7 +149,9 @@ export class UserResolver {
           },
           {
             name: name as AttributeValue,
-            city: _.camelCase(city) as AttributeValue
+            city: _.camelCase(city) as AttributeValue,
+            longitude: longitude as AttributeValue,
+            latitude: latitude as AttributeValue
           },
           {
             likers: [ctx.userID]
