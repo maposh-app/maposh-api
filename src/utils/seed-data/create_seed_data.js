@@ -14,7 +14,7 @@ const offlineUserInfo = {
   lastName: "tester",
   location: "the Universe",
   description: "the curious explorer",
-  favourites: []
+  likes: []
 };
 
 udata.push(offlineUserInfo);
@@ -33,12 +33,12 @@ for (let i = 0; i < handlePlaceNames.length; i += 1) {
     placeID: placeId,
     city: faker.address.city(),
     upvoteCount: i,
-    followers: [offlineUserInfo.userID]
+    likers: [offlineUserInfo.userID]
   };
   pdata.push(placeInfo);
 
   for (let j = 0; j < usersPerPlace; j += 1) {
-    const favourites = [placeId];
+    const likes = [placeId];
 
     const firstName = faker.name.firstName();
     const lastName = faker.name.lastName();
@@ -54,7 +54,7 @@ for (let i = 0; i < handlePlaceNames.length; i += 1) {
       lastName,
       location,
       description,
-      favourites
+      likes
     };
 
     udata.push(userInfo);

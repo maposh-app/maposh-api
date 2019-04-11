@@ -22,9 +22,9 @@ allUsers.forEach(user => {
       lastName: user.lastName,
       location: user.location,
       description: user.description,
-      favourites:
-        user.favourites && user.favourites.length > 0
-          ? docClient.createSet(user.favourites)
+      likes:
+        user.likes && user.likes.length > 0
+          ? docClient.createSet(user.likes)
           : undefined
     }
   };
@@ -50,9 +50,9 @@ allPlaces.forEach(place => {
       placeID: place.placeID,
       city: place.city,
       upvoteCount: place.upvoteCount,
-      followers:
-        place.followers && place.followers.length > 0
-          ? docClient.createSet(place.followers)
+      likers:
+        place.likers && place.likers.length > 0
+          ? docClient.createSet(place.likers)
           : undefined
     }
   };
