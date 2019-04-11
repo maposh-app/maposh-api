@@ -13,7 +13,7 @@
     "dynamodb-generate-seed-data": "cd ./src/utils/seed-data && node create_seed_data.js",
     "dynamodb-insert-seed-data-staging": "cd ./src/utils/seed-data && node insert_seed_data_staging.js",
     "prestart": "./src/utils/scripts/pre.sh",
-    "start": "yarn dynamodb-generate-seed-data && serverless dynamodb install --localPath ./bin && env-cmd .env serverless offline start",
+    "start": "serverless dynamodb install --localPath ./bin && env-cmd .env serverless offline start",
     "deploy-staging": "env-cmd .env serverless --stage=staging deploy"
   },
   "dependencies": {

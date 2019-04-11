@@ -2,23 +2,20 @@ import { Field, ID, ObjectType } from "type-graphql";
 
 @ObjectType()
 export class User {
-  @Field(() => ID)
+  @Field(() => ID, { nullable: true })
   public handle: string;
 
   @Field(() => ID)
   public userID: string;
 
-  @Field()
+  @Field({ nullable: true })
   public firstName: string;
 
-  @Field()
+  @Field({ nullable: true })
   public lastName: string;
 
-  @Field()
+  @Field({ nullable: true })
   public location: string;
-
-  @Field()
-  public created_at: string;
 
   @Field({ nullable: true })
   public description?: string;
