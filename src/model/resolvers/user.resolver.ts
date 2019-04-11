@@ -121,6 +121,7 @@ export class UserResolver {
             latitude: latitude as AttributeValue
           },
           {
+            likers: !shouldAddToLikes ? [ctx.userID] : [],
             dislikers: shouldRemoveFromDislikes ? [ctx.userID] : []
           }
         );
@@ -209,6 +210,7 @@ export class UserResolver {
             latitude: latitude as AttributeValue
           },
           {
+            dislikers: !shouldAddToDislikes ? [ctx.userID] : [],
             likers: shouldRemoveFromLikes ? [ctx.userID] : []
           }
         );
