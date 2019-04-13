@@ -23,12 +23,16 @@ const playgroundConfig = (() => {
   #   like(
   #     placeID: "0"
   #     city: "Nice",
-  #     name: "The Nicest Cafe in the World"
+  #     name: "The Nicest Cafe in the World",
+  #     longitude: 0.0,
+  #     latitude: 0.0
   #   )
   #   dislike(
   #     placeID: "1"
   #     city: "Moscow",
   #     name: "Not The Nicest Cafe in the World"
+  #     longitude: 0.0,
+  #     latitude: 0.0
   #   )
   # }
   `;

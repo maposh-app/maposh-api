@@ -1,4 +1,4 @@
-import { AttributeValue } from "aws-sdk/clients/dynamodb";
+import { AttributeValue, GetItemOutput } from "aws-sdk/clients/dynamodb";
 import _ from "lodash";
 import {
   Arg,
@@ -48,60 +48,71 @@ export class UserResolver {
   }
 
   @Mutation(() => Boolean)
-  public forget(
-    @Ctx() ctx: Context,
-    @Arg("placeID") placeID: string,
-    @Arg("score") score: number
-  ) {
-    return db
-      .modifyAttributes("Users", { userID: ctx.userID }, undefined, undefined, {
-        likes: [placeID],
-        dislikes: [placeID]
-      })
-      .then(() =>
-        db.modifyAttributes(
-          "Places",
-          { placeID },
-          { upvoteCount: score },
-          undefined,
-          {
-            likers: [ctx.userID],
-            dislikers: [ctx.userID]
-          }
-        )
-      )
-      .then(() => true)
-      .catch(err => {
-        console.log(err);
-        return err;
-      });
-  }
-
-  @Mutation(() => Boolean)
   public like(
     @Ctx() ctx: Context,
     @Arg("placeID") placeID: string,
     @Arg("name") name: string,
     @Arg("city") city: string,
     @Arg("longitude") longitude?: number,
-    @Arg("latitude") latitude?: number,
-    @Arg("extra") extra?: number
+    @Arg("latitude") latitude?: number
   ) {
     return db
-      .modifyAttributes(
-        "Users",
-        { userID: ctx.userID },
-        { likes: [placeID] },
-        undefined,
-        { dislikes: [placeID] }
-      )
-      .then(() =>
+      .getByKey("Users", { userID: ctx.userID })
+      .then((info: GetItemOutput) => {
+        console.log("USER INFO:", info);
+        const userInfo: {
+          userID?: string;
+          likes?: Set<string>;
+          dislikes?: Set<string>;
+        } = {};
+        if (info.Item && info.Item.userID) {
+          userInfo.userID = info.Item.userID as string;
+        }
+        if (info.Item && info.Item.likes) {
+          userInfo.likes = new Set<string>((info.Item.likes as any)
+            .values as string[]);
+        }
+        if (info.Item && info.Item.dislikes) {
+          userInfo.dislikes = new Set<string>((info.Item.dislikes as any)
+            .values as string[]);
+        }
+        return userInfo;
+      })
+      .then(user => {
+        let shouldAddToLikes = true;
+        let shouldRemoveFromDislikes = false;
+        if (user.likes && user.likes.has(placeID)) {
+          shouldAddToLikes = false;
+        }
+        if (user.dislikes && user.dislikes.has(placeID)) {
+          shouldRemoveFromDislikes = true;
+        }
         db.modifyAttributes(
+          "Users",
+          { userID: ctx.userID },
+          {
+            likes: shouldAddToLikes ? [placeID] : []
+          },
+          undefined,
+          {
+            likes: !shouldAddToLikes ? [placeID] : [],
+            dislikes: shouldRemoveFromDislikes ? [placeID] : []
+          }
+        ).catch(err => {
+          console.log("USER UPDATE ERROR:", err);
+          throw err;
+        });
+        return { shouldAddToLikes, shouldRemoveFromDislikes };
+      })
+      .then(({ shouldAddToLikes, shouldRemoveFromDislikes }) => {
+        return db.modifyAttributes(
           "Places",
           { placeID },
           {
-            likers: [ctx.userID],
-            upvoteCount: extra ? extra + 1 : 1
+            likers: shouldAddToLikes ? [ctx.userID] : [],
+            upvoteCount: !shouldAddToLikes
+              ? -1
+              : 1 + Number(shouldRemoveFromDislikes)
           },
           {
             name: name as AttributeValue,
@@ -110,10 +121,11 @@ export class UserResolver {
             latitude: latitude as AttributeValue
           },
           {
-            dislikers: [ctx.userID]
+            likers: !shouldAddToLikes ? [ctx.userID] : [],
+            dislikers: shouldRemoveFromDislikes ? [ctx.userID] : []
           }
-        )
-      )
+        );
+      })
       .then(() => true)
       .catch(err => {
         console.log(err);
@@ -128,24 +140,68 @@ export class UserResolver {
     @Arg("name") name: string,
     @Arg("city") city: string,
     @Arg("longitude") longitude?: number,
-    @Arg("latitude") latitude?: number,
-    @Arg("extra") extra?: number
+    @Arg("latitude") latitude?: number
   ) {
     return db
-      .modifyAttributes(
-        "Users",
-        { userID: ctx.userID },
-        { dislikes: [placeID] },
-        undefined,
-        { likes: [placeID] }
-      )
-      .then(() =>
+      .getByKey("Users", { userID: ctx.userID })
+      .then((info: GetItemOutput) => {
+        console.log("USER INFO:", info);
+        const userInfo: {
+          userID?: string;
+          likes?: Set<string>;
+          dislikes?: Set<string>;
+        } = {};
+        if (info.Item && info.Item.userID) {
+          userInfo.userID = info.Item.userID as string;
+        }
+        if (info.Item && info.Item.likes) {
+          userInfo.likes = new Set<string>((info.Item.likes as any)
+            .values as string[]);
+        }
+        if (info.Item && info.Item.dislikes) {
+          userInfo.dislikes = new Set<string>((info.Item.dislikes as any)
+            .values as string[]);
+        }
+        return userInfo;
+      })
+      .then(user => {
+        let shouldAddToDislikes = true;
+        let shouldRemoveFromLikes = false;
+        if (user.dislikes && user.dislikes.has(placeID)) {
+          shouldAddToDislikes = false;
+        }
+        if (user.likes && user.likes.has(placeID)) {
+          shouldRemoveFromLikes = true;
+        }
         db.modifyAttributes(
+          "Users",
+          { userID: ctx.userID },
+          {
+            dislikes: shouldAddToDislikes ? [placeID] : []
+          },
+          undefined,
+          {
+            dislikes: !shouldAddToDislikes ? [placeID] : [],
+            likes: shouldRemoveFromLikes ? [placeID] : []
+          }
+        ).catch(err => {
+          console.log("USER UPDATE ERROR:", err);
+          throw err;
+        });
+        return {
+          shouldAddToDislikes,
+          shouldRemoveFromLikes
+        };
+      })
+      .then(({ shouldAddToDislikes, shouldRemoveFromLikes }) => {
+        return db.modifyAttributes(
           "Places",
           { placeID },
           {
-            dislikers: [ctx.userID],
-            upvoteCount: extra ? extra - 1 : -1
+            dislikers: shouldAddToDislikes ? [ctx.userID] : [],
+            upvoteCount: !shouldAddToDislikes
+              ? 1
+              : -1 - Number(shouldRemoveFromLikes)
           },
           {
             name: name as AttributeValue,
@@ -154,10 +210,11 @@ export class UserResolver {
             latitude: latitude as AttributeValue
           },
           {
-            likers: [ctx.userID]
+            dislikers: !shouldAddToDislikes ? [ctx.userID] : [],
+            likers: shouldRemoveFromLikes ? [ctx.userID] : []
           }
-        )
-      )
+        );
+      })
       .then(() => true)
       .catch(err => {
         console.log(err);
@@ -166,7 +223,8 @@ export class UserResolver {
   }
 
   private async getUserPlaceProp(userID: string, prop: string) {
-    const result = await db.getByKey("Users", { userID }, prop);
+    const result = await db.getByKey("Users", { userID });
+    console.log("USER DATA", result);
     return result.Item && result.Item[prop]
       ? (result.Item[prop] as any).values.map(async (placeID: string) => {
           const placeContainer = await db.getByKey("Places", { placeID });

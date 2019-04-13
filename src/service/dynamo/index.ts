@@ -213,11 +213,22 @@ export function modifyAttributes(
 
   let addExpressions: string[] = [];
 
-  if (increments) {
+  increments = increments
+    ? _.transform(increments, (result, value, attribute) => {
+        if (Array.isArray(value)) {
+          if (value.length > 0) {
+            result[attribute] = value;
+          }
+        } else {
+          result[attribute] = value;
+        }
+      })
+    : undefined;
+
+  if (increments && Object.keys(increments).length > 0) {
     addExpressions = addExpressions.concat(
       Object.keys(increments).map(attribute => `#${attribute} :${attribute}`)
     );
-
     ExpressionAttributeNames = {
       ...ExpressionAttributeNames,
       ..._.transform(increments, (result, _value, attribute) => {
@@ -239,7 +250,18 @@ export function modifyAttributes(
     UpdateExpression.push(`ADD ${addExpressions.join()}`);
   }
 
-  if (properties) {
+  properties = properties
+    ? _.transform(properties, (result, value, attribute) => {
+        if (Array.isArray(value)) {
+          if (value.length > 0) {
+            result[attribute] = value;
+          }
+        } else {
+          result[attribute] = value;
+        }
+      })
+    : undefined;
+  if (properties && Object.keys(properties).length > 0) {
     UpdateExpression.push(
       `SET ${Object.keys(properties)
         .map(attribute => `#${attribute} = :${attribute}`)
@@ -261,7 +283,18 @@ export function modifyAttributes(
     };
   }
 
-  if (pops) {
+  pops = pops
+    ? _.transform(pops, (result, value, attribute) => {
+        if (Array.isArray(value)) {
+          if (value.length > 0) {
+            result[attribute] = value;
+          }
+        } else {
+          result[attribute] = value;
+        }
+      })
+    : undefined;
+  if (pops && Object.keys(pops).length > 0) {
     UpdateExpression.push(
       `DELETE ${Object.keys(pops)
         .map(attribute => `#${attribute} :${attribute}`)
@@ -291,6 +324,7 @@ export function modifyAttributes(
     ReturnValues: "UPDATED_NEW"
   };
 
+  console.log(params);
   return updateItem(params);
 }
 
